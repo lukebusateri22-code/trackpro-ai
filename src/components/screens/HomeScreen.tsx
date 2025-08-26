@@ -4,406 +4,368 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
-  Trophy, Target, Activity, Calendar, Play, Video, 
-  BarChart3, Plus, TrendingUp, Clock, Zap, Menu, Settings,
-  Timer, Users, Award
+  Play, Target, TrendingUp, Calendar, Clock, Zap, 
+  Trophy, Activity, Heart, Menu, Settings, ChevronRight,
+  Timer, MapPin, Users, Flame, Bolt, Wind, Mountain,
+  Video, BarChart3, Plus, Award
 } from 'lucide-react';
-import PerformanceRecorder from '../PerformanceRecorder';
+import { useTraining } from '@/contexts/TrainingContext';
+import { useUser } from '@/contexts/UserContext';
+import athleticTechTheme, { getEventColor, getEventGradient } from '@/lib/athleticTechTheme';
 import AICoachChat from '../AICoachChat';
 import { VideoAnalysisModal } from '../VideoAnalysisModal';
-import { useUser } from '@/contexts/UserContext';
-import { useTraining } from '@/contexts/TrainingContext';
-import { useRecovery } from '@/contexts/RecoveryContext';
-import { useGoals } from '@/contexts/GoalsContext';
-import { trackTechTheme, getPerformanceColor } from '@/lib/trackTechTheme';
+import AnalyticsScreen from './AnalyticsScreen';
 
-export default function HomeScreen() {
+const HomeScreen: React.FC = () => {
   const { user } = useUser();
-  const { getTrainingStats } = useTraining();
-  const { getRecoveryScore } = useRecovery();
-  const { getActiveGoals, getUpcomingDeadlines } = useGoals();
-  const [videoAnalysisOpen, setVideoAnalysisOpen] = useState(false);
+  const { workouts, getTrainingStats } = useTraining();
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [showAIChat, setShowAIChat] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
   
   const trainingStats = getTrainingStats();
-  const recoveryScore = getRecoveryScore();
-  const activeGoals = getActiveGoals();
-  const upcomingDeadlines = getUpcomingDeadlines(7);
+  const completedWorkouts = workouts.filter(w => w.completed).length;
   
   const today = new Date();
-  const greeting = today.getHours() < 12 ? 'Good morning' : today.getHours() < 18 ? 'Good afternoon' : 'Good evening';
+  const greeting = () => {
+    const hour = today.getHours();
+    if (hour < 12) return 'Ready to Dominate';
+    if (hour < 17) return 'Keep Pushing';
+    return 'Finish Strong';
+  };
+  
+  // Mock data for exciting visuals
+  const weeklyProgress = [
+    { day: 'Mon', value: 85, event: 'sprints' },
+    { day: 'Tue', value: 92, event: 'jumps' },
+    { day: 'Wed', value: 78, event: 'throws' },
+    { day: 'Thu', value: 95, event: 'distance' },
+    { day: 'Fri', value: 88, event: 'sprints' },
+    { day: 'Sat', value: 90, event: 'jumps' },
+    { day: 'Sun', value: 82, event: 'recovery' },
+  ];
+  
+  const quickActions = [
+    { 
+      title: 'Video Analysis', 
+      subtitle: 'Analyze technique', 
+      icon: Video, 
+      gradient: athleticTechTheme.gradients.tech,
+      action: () => setShowVideoModal(true)
+    },
+    { 
+      title: 'Training Plans', 
+      subtitle: 'Custom workouts', 
+      icon: Target, 
+      gradient: athleticTechTheme.gradients.speed,
+      action: () => {}
+    },
+    { 
+      title: 'AI Coach', 
+      subtitle: 'Get insights', 
+      icon: Zap, 
+      gradient: athleticTechTheme.gradients.power,
+      action: () => setShowAIChat(true)
+    },
+    { 
+      title: 'Analytics', 
+      subtitle: 'View progress', 
+      icon: BarChart3, 
+      gradient: athleticTechTheme.gradients.endurance,
+      action: () => setShowAnalytics(true)
+    },
+  ];
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: trackTechTheme.colors.light.background }}>
-      {/* Dark Tech Header */}
+    <div className="min-h-screen" style={{ backgroundColor: athleticTechTheme.colors.surface.secondary }}>
+      {/* Athletic Hero Section */}
       <div 
-        className="relative overflow-hidden"
+        className="relative overflow-hidden min-h-[40vh] flex items-center"
         style={{ 
-          background: trackTechTheme.gradients.darkHeader,
-          color: trackTechTheme.colors.dark.text
+          background: athleticTechTheme.gradients.hero,
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Top Bar */}
-          <div className="flex items-center justify-between mb-6">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 animate-bounce">
+            <Bolt className="h-16 w-16 text-white" />
+          </div>
+          <div className="absolute top-20 right-20 animate-pulse">
+            <Wind className="h-12 w-12 text-white" />
+          </div>
+          <div className="absolute bottom-20 left-1/4 animate-bounce" style={{ animationDelay: '1s' }}>
+            <Flame className="h-14 w-14 text-white" />
+          </div>
+          <div className="absolute bottom-10 right-1/3 animate-pulse" style={{ animationDelay: '2s' }}>
+            <Mountain className="h-10 w-10 text-white" />
+          </div>
+        </div>
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-white">
+          {/* Top Navigation */}
+          <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
-              <Menu className="h-6 w-6" style={{ color: trackTechTheme.colors.dark.textSecondary }} />
-              <div className="text-sm" style={{ color: trackTechTheme.colors.dark.textSecondary }}>
-                {today.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+              <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
+                <Menu className="h-5 w-5" />
               </div>
+              <span className="text-sm font-medium opacity-80">TrackPro AI</span>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-1">
-                <div className="w-1 h-1 bg-white rounded-full"></div>
-                <div className="w-1 h-1 bg-white rounded-full"></div>
-                <div className="w-1 h-1 bg-white rounded-full opacity-50"></div>
-              </div>
-              <div className="text-sm font-medium">100%</div>
-              <div className="w-6 h-3 border border-white/30 rounded-sm">
-                <div className="w-full h-full bg-green-500 rounded-sm"></div>
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
+                <Settings className="h-5 w-5" />
               </div>
             </div>
           </div>
 
-          {/* Main Header Content */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">
-                TrackPro AI
-              </h1>
-              <p className="text-lg" style={{ color: trackTechTheme.colors.dark.textSecondary }}>
-                Welcome, {user?.username || 'Athlete'}
-              </p>
+          {/* Hero Content */}
+          <div className="text-center">
+            <div className="mb-6">
+              <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full" 
+                   style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)' }}>
+                <Zap className="h-4 w-4" />
+                <span className="text-sm font-medium">{greeting()}</span>
+              </div>
             </div>
-            <div className="p-3 rounded-xl" style={{ backgroundColor: 'rgba(59, 130, 246, 0.2)' }}>
-              <Zap className="h-8 w-8" style={{ color: trackTechTheme.colors.accents.blue }} />
+            
+            <h1 className="text-5xl md:text-6xl font-black mb-4 leading-tight">
+              <span className="block">UNLEASH YOUR</span>
+              <span className="block bg-gradient-to-r from-white to-yellow-200 bg-clip-text text-transparent">
+                POTENTIAL
+              </span>
+            </h1>
+            
+            <p className="text-xl md:text-2xl font-medium opacity-90 mb-8 max-w-2xl mx-auto">
+              Welcome back, <span className="font-bold">{user?.username || 'Champion'}</span>! 
+              Ready to dominate the track today?
+            </p>
+            
+            {/* Quick Stats Bar */}
+            <div className="flex justify-center space-x-8 mb-8">
+              <div className="text-center">
+                <div className="text-3xl font-black">{completedWorkouts}</div>
+                <div className="text-sm opacity-80">Workouts</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-black">94%</div>
+                <div className="text-sm opacity-80">Performance</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-black">12</div>
+                <div className="text-sm opacity-80">PRs This Month</div>
+              </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Recovery Score Card in Header */}
-          <div className="mt-6">
-            <div 
-              className="rounded-2xl p-6 border"
-              style={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                borderColor: 'rgba(255, 255, 255, 0.2)',
-                backdropFilter: 'blur(10px)'
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold mb-1">Recovery Score</h3>
-                  <p className="text-sm" style={{ color: trackTechTheme.colors.dark.textSecondary }}>
-                    Connect Your Wearable!
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Quick Actions Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {quickActions.map((action, index) => {
+            const IconComponent = action.icon;
+            return (
+              <Card 
+                key={index}
+                className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105"
+                style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}
+                onClick={action.action}
+              >
+                <CardContent className="p-6 text-center">
+                  <div 
+                    className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center"
+                    style={{ background: action.gradient }}
+                  >
+                    <IconComponent className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="font-bold text-lg mb-1" style={{ color: athleticTechTheme.colors.text.primary }}>
+                    {action.title}
+                  </h3>
+                  <p className="text-sm" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                    {action.subtitle}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Recent Performance Tracker */}
+        <Card className="border-0 shadow-lg mb-8" style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+              <Trophy className="h-5 w-5" style={{ color: athleticTechTheme.colors.primary.track }} />
+              Recent Performance
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { event: '100m Sprint', time: '10.85s', improvement: '+0.12s', trend: 'up', color: athleticTechTheme.colors.events.sprints },
+                { event: 'Long Jump', distance: '6.45m', improvement: '+0.08m', trend: 'up', color: athleticTechTheme.colors.events.jumps },
+                { event: 'Shot Put', distance: '12.3m', improvement: '-0.05m', trend: 'down', color: athleticTechTheme.colors.events.throws },
+                { event: '1500m', time: '4:12.8', improvement: '-2.1s', trend: 'up', color: athleticTechTheme.colors.events.distance }
+              ].map((performance, index) => (
+                <div key={index} className="p-4 rounded-xl transition-all duration-300 hover:scale-105" style={{ backgroundColor: `${performance.color}10` }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div 
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: performance.color }}
+                    />
+                    <Badge 
+                      className={`text-xs ${
+                        performance.trend === 'up' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {performance.improvement}
+                    </Badge>
+                  </div>
+                  <h4 className="font-semibold text-sm mb-1" style={{ color: athleticTechTheme.colors.text.primary }}>
+                    {performance.event}
+                  </h4>
+                  <p className="text-lg font-bold" style={{ color: performance.color }}>
+                    {performance.time || performance.distance}
+                  </p>
+                  <p className="text-xs" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                    Personal Best
                   </p>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <div 
-                      className="w-16 h-16 rounded-full border-4 flex items-center justify-center"
-                      style={{ 
-                        borderColor: getPerformanceColor(recoveryScore),
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                      }}
-                    >
-                      <span className="text-lg font-bold">{recoveryScore.toFixed(1)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Today's Workout Card */}
-        <Card 
-          className="mb-8 border-0 shadow-lg hover:shadow-xl transition-all duration-300"
-          style={{ 
-            backgroundColor: trackTechTheme.colors.light.surface,
-            boxShadow: trackTechTheme.shadows.lg
-          }}
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold" style={{ color: trackTechTheme.colors.light.text }}>
-                Today's Workout
-              </h2>
-              <Badge 
-                className="px-3 py-1 rounded-full text-xs font-medium"
-                style={{ 
-                  backgroundColor: `${trackTechTheme.colors.accents.blue}20`,
-                  color: trackTechTheme.colors.accents.blue
-                }}
-              >
-                Dynamic
-              </Badge>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3">
-                <div 
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: trackTechTheme.colors.performance.excellent }}
-                />
-                <span className="text-sm font-medium" style={{ color: trackTechTheme.colors.light.text }}>
-                  Fence Sprint Drills (Basic)
-                </span>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <div 
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: trackTechTheme.colors.accents.blue }}
-                />
-                <span className="text-sm font-medium" style={{ color: trackTechTheme.colors.light.text }}>
-                  Single Leg Drop Accel
-                </span>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <div 
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: trackTechTheme.colors.accents.cyan }}
-                />
-                <span className="text-sm font-medium" style={{ color: trackTechTheme.colors.light.text }}>
-                  2 Point Accel
-                </span>
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card 
-            className="border-0 shadow-md hover:shadow-lg transition-all duration-300"
-            style={{ backgroundColor: trackTechTheme.colors.light.surface }}
-          >
-            <CardContent className="p-4">
-              <div className="text-center">
-                <div 
-                  className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center"
-                  style={{ backgroundColor: `${trackTechTheme.colors.accents.blue}20` }}
-                >
-                  <Target className="h-6 w-6" style={{ color: trackTechTheme.colors.accents.blue }} />
+        {/* Recent Activity */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Today's Focus */}
+          <Card className="border-0 shadow-lg" style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                <Target className="h-5 w-5" style={{ color: athleticTechTheme.colors.events.sprints }} />
+                Today's Focus
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 rounded-xl" style={{ backgroundColor: `${athleticTechTheme.colors.events.sprints}10` }}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold" style={{ color: athleticTechTheme.colors.text.primary }}>
+                    Sprint Training
+                  </span>
+                  <Badge style={{ backgroundColor: athleticTechTheme.colors.events.sprints, color: 'white' }}>
+                    High Priority
+                  </Badge>
                 </div>
-                <p className="text-2xl font-bold mb-1" style={{ color: trackTechTheme.colors.light.text }}>
-                  {activeGoals.length}
+                <p className="text-sm" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                  Focus on acceleration and top speed development
                 </p>
-                <p className="text-xs font-medium" style={{ color: trackTechTheme.colors.light.textSecondary }}>
-                  Active Goals
-                </p>
+                <Progress value={75} className="mt-3" />
               </div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="border-0 shadow-md hover:shadow-lg transition-all duration-300"
-            style={{ backgroundColor: trackTechTheme.colors.light.surface }}
-          >
-            <CardContent className="p-4">
-              <div className="text-center">
-                <div 
-                  className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center"
-                  style={{ backgroundColor: `${trackTechTheme.colors.performance.excellent}20` }}
-                >
-                  <Activity className="h-6 w-6" style={{ color: trackTechTheme.colors.performance.excellent }} />
-                </div>
-                <p className="text-2xl font-bold mb-1" style={{ color: trackTechTheme.colors.light.text }}>
-                  {trainingStats.totalWorkouts}
-                </p>
-                <p className="text-xs font-medium" style={{ color: trackTechTheme.colors.light.textSecondary }}>
-                  This Week
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="border-0 shadow-md hover:shadow-lg transition-all duration-300"
-            style={{ backgroundColor: trackTechTheme.colors.light.surface }}
-          >
-            <CardContent className="p-4">
-              <div className="text-center">
-                <div 
-                  className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center"
-                  style={{ backgroundColor: `${trackTechTheme.colors.accents.purple}20` }}
-                >
-                  <Trophy className="h-6 w-6" style={{ color: trackTechTheme.colors.accents.purple }} />
-                </div>
-                <p className="text-2xl font-bold mb-1" style={{ color: trackTechTheme.colors.light.text }}>
-                  {Object.keys(user?.personalRecords || {}).length}
-                </p>
-                <p className="text-xs font-medium" style={{ color: trackTechTheme.colors.light.textSecondary }}>
-                  Personal Bests
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="border-0 shadow-md hover:shadow-lg transition-all duration-300"
-            style={{ backgroundColor: trackTechTheme.colors.light.surface }}
-          >
-            <CardContent className="p-4">
-              <div className="text-center">
-                <div 
-                  className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center"
-                  style={{ backgroundColor: `${trackTechTheme.colors.accents.orange}20` }}
-                >
-                  <Clock className="h-6 w-6" style={{ color: trackTechTheme.colors.accents.orange }} />
-                </div>
-                <p className="text-2xl font-bold mb-1" style={{ color: trackTechTheme.colors.light.text }}>
-                  {trainingStats.totalHours.toFixed(1)}h
-                </p>
-                <p className="text-xs font-medium" style={{ color: trackTechTheme.colors.light.textSecondary }}>
-                  Training Hours
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
-        <Card className="bg-white border-0 shadow-sm mb-8">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Button 
-                onClick={() => setVideoAnalysisOpen(true)}
-                className="h-24 bg-blue-600 hover:bg-blue-700 text-white flex flex-col items-center justify-center space-y-2 rounded-xl"
-              >
-                <Video className="h-8 w-8" />
-                <span className="text-sm font-medium">Video Analysis</span>
-              </Button>
               
-              <Button 
-                variant="outline"
-                className="h-24 border-2 border-green-200 text-green-700 hover:bg-green-50 flex flex-col items-center justify-center space-y-2 rounded-xl"
-              >
-                <Play className="h-8 w-8" />
-                <span className="text-sm font-medium">Start Training</span>
-              </Button>
+              <div className="p-4 rounded-xl" style={{ backgroundColor: `${athleticTechTheme.colors.events.jumps}10` }}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold" style={{ color: athleticTechTheme.colors.text.primary }}>
+                    Technique Review
+                  </span>
+                  <Badge style={{ backgroundColor: athleticTechTheme.colors.events.jumps, color: 'white' }}>
+                    Medium
+                  </Badge>
+                </div>
+                <p className="text-sm" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                  Video analysis of yesterday's session
+                </p>
+                <Progress value={30} className="mt-3" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Achievements */}
+          <Card className="border-0 shadow-lg" style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                <Award className="h-5 w-5" style={{ color: athleticTechTheme.colors.performance.excellent }} />
+                Recent Achievements
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center space-x-3 p-3 rounded-lg" style={{ backgroundColor: athleticTechTheme.colors.surface.secondary }}>
+                <div 
+                  className="w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: athleticTechTheme.colors.performance.excellent }}
+                >
+                  <Trophy className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm" style={{ color: athleticTechTheme.colors.text.primary }}>
+                    New 100m PR!
+                  </p>
+                  <p className="text-xs" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                    10.85s - Personal best
+                  </p>
+                </div>
+              </div>
               
-              <Button 
-                variant="outline"
-                className="h-24 border-2 border-purple-200 text-purple-700 hover:bg-purple-50 flex flex-col items-center justify-center space-y-2 rounded-xl"
-              >
-                <BarChart3 className="h-8 w-8" />
-                <span className="text-sm font-medium">View Analytics</span>
-              </Button>
+              <div className="flex items-center space-x-3 p-3 rounded-lg" style={{ backgroundColor: athleticTechTheme.colors.surface.secondary }}>
+                <div 
+                  className="w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: athleticTechTheme.colors.events.jumps }}
+                >
+                  <Zap className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm" style={{ color: athleticTechTheme.colors.text.primary }}>
+                    Consistency Streak
+                  </p>
+                  <p className="text-xs" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                    7 days of training
+                  </p>
+                </div>
+              </div>
               
-              <Button 
-                variant="outline"
-                className="h-24 border-2 border-amber-200 text-amber-700 hover:bg-amber-50 flex flex-col items-center justify-center space-y-2 rounded-xl"
-              >
-                <Plus className="h-8 w-8" />
-                <span className="text-sm font-medium">New Goal</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Performance Recorder - Takes 2 columns */}
-          <div className="lg:col-span-2">
-            <Card className="bg-white border-0 shadow-sm">
-              <CardHeader className="border-b border-gray-100">
-                <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
-                  <Target className="h-5 w-5 mr-2 text-blue-600" />
-                  Performance Analysis
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <PerformanceRecorder />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* AI Coach Chat */}
-            <AICoachChat />
-            
-            {/* Active Goals */}
-            {activeGoals.length > 0 && (
-              <Card className="bg-white border-0 shadow-sm">
-                <CardHeader className="border-b border-gray-100">
-                  <CardTitle className="text-lg font-semibold text-gray-900">Active Goals</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    {activeGoals.slice(0, 3).map(goal => {
-                      const progress = goal.currentValue && goal.targetValue ? 
-                        Math.min(100, (goal.currentValue / goal.targetValue) * 100) : 0;
-                      
-                      return (
-                        <div key={goal.id} className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-medium text-gray-900 truncate">{goal.title}</h4>
-                            <span className="text-xs text-gray-500">{progress.toFixed(0)}%</span>
-                          </div>
-                          <Progress value={progress} className="h-2" />
-                          <p className="text-xs text-gray-600">{goal.event}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Upcoming Deadlines */}
-            {upcomingDeadlines.length > 0 && (
-              <Card className="bg-white border-0 shadow-sm">
-                <CardHeader className="border-b border-gray-100">
-                  <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
-                    <Calendar className="h-5 w-5 mr-2 text-amber-600" />
-                    Upcoming Deadlines
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-3">
-                    {upcomingDeadlines.slice(0, 3).map(goal => {
-                      const daysLeft = Math.ceil(
-                        (new Date(goal.targetDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-                      );
-                      
-                      return (
-                        <div key={goal.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">{goal.title}</p>
-                            <p className="text-xs text-gray-600">{goal.event}</p>
-                          </div>
-                          <Badge 
-                            className={`ml-2 ${
-                              daysLeft <= 3 ? 'bg-red-100 text-red-800' : 
-                              daysLeft <= 7 ? 'bg-amber-100 text-amber-800' : 
-                              'bg-blue-100 text-blue-800'
-                            }`}
-                          >
-                            {daysLeft}d
-                          </Badge>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+              <div className="flex items-center space-x-3 p-3 rounded-lg" style={{ backgroundColor: athleticTechTheme.colors.surface.secondary }}>
+                <div 
+                  className="w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: athleticTechTheme.colors.events.throws }}
+                >
+                  <Target className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm" style={{ color: athleticTechTheme.colors.text.primary }}>
+                    Goal Achieved
+                  </p>
+                  <p className="text-xs" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                    Sub-11 second 100m
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      {/* Video Analysis Modal */}
-      <VideoAnalysisModal 
-        isOpen={videoAnalysisOpen} 
-        onClose={() => setVideoAnalysisOpen(false)} 
-      />
+      {/* Modals */}
+      {showVideoModal && (
+        <VideoAnalysisModal 
+          isOpen={showVideoModal}
+          onClose={() => setShowVideoModal(false)}
+        />
+      )}
+      
+      {showAIChat && (
+        <AICoachChat 
+          isOpen={showAIChat}
+          onClose={() => setShowAIChat(false)}
+        />
+      )}
+      
+      {showAnalytics && (
+        <AnalyticsScreen 
+          onClose={() => setShowAnalytics(false)}
+        />
+      )}
     </div>
   );
-}
+};
+
+export default HomeScreen;

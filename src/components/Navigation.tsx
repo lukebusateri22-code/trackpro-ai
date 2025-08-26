@@ -1,6 +1,6 @@
 import React from 'react';
-import { Home, Dumbbell, Heart, Target, User, BarChart3, MessageSquare } from 'lucide-react';
-import { trackTechTheme } from '@/lib/trackTechTheme';
+import { Home, Target, Activity, User, Heart, Flame, Zap, Trophy } from 'lucide-react';
+import athleticTechTheme from '@/lib/athleticTechTheme';
 
 interface NavigationProps {
   activeTab: string;
@@ -9,19 +9,19 @@ interface NavigationProps {
 
 const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
-    { id: 'home', label: 'Feed', icon: BarChart3, color: trackTechTheme.colors.accents.blue },
-    { id: 'training', label: 'Leaderboard', icon: Target, color: trackTechTheme.colors.accents.green },
-    { id: 'recovery', label: 'Messaging', icon: MessageSquare, color: trackTechTheme.colors.accents.orange },
-    { id: 'goals', label: 'Messaging', icon: MessageSquare, color: trackTechTheme.colors.accents.orange },
-    { id: 'profile', label: 'Profile', icon: User, color: trackTechTheme.colors.accents.pink },
+    { id: 'home', label: 'Home', icon: Home, color: athleticTechTheme.colors.primary.track },
+    { id: 'training', label: 'Training', icon: Zap, color: athleticTechTheme.colors.events.sprints },
+    { id: 'recovery', label: 'Recovery', icon: Heart, color: athleticTechTheme.colors.performance.recovery },
+    { id: 'goals', label: 'Goals', icon: Target, color: athleticTechTheme.colors.events.jumps },
+    { id: 'profile', label: 'Profile', icon: User, color: athleticTechTheme.colors.primary.tech },
   ];
 
   return (
     <div 
       className="fixed bottom-0 left-0 right-0 z-50 border-t"
       style={{ 
-        backgroundColor: trackTechTheme.colors.light.surface,
-        borderColor: trackTechTheme.colors.light.border
+        backgroundColor: athleticTechTheme.colors.surface.primary,
+        borderColor: athleticTechTheme.colors.interactive.border
       }}
     >
       <div className="max-w-md mx-auto">
@@ -51,16 +51,16 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
                     size={20} 
                     strokeWidth={2}
                     style={{ 
-                      color: isActive ? trackTechTheme.colors.light.surface : tab.color
+                      color: isActive ? athleticTechTheme.colors.surface.primary : tab.color
                     }}
                   />
                 </div>
                 <span 
-                  className={`text-xs font-medium transition-all ${
-                    isActive ? 'font-semibold' : ''
+                  className={`text-xs mt-1 font-medium transition-colors duration-200 ${
+                    isActive ? 'opacity-100' : 'opacity-60'
                   }`}
-                  style={{
-                    color: isActive ? trackTechTheme.colors.light.text : trackTechTheme.colors.light.textSecondary
+                  style={{ 
+                    color: isActive ? athleticTechTheme.colors.text.primary : athleticTechTheme.colors.text.secondary
                   }}
                 >
                   {tab.label}

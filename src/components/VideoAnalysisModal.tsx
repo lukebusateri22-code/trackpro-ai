@@ -1,51 +1,50 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Slider } from '@/components/ui/slider';
+import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Camera, Upload, Zap, Play, Pause, SkipBack, SkipForward, Target, Crosshair } from 'lucide-react';
+import { 
+  Upload, Video, FileVideo, CheckCircle, AlertCircle, 
+  Play, Pause, Zap, Target, X, Camera, SkipBack, SkipForward, Wind 
+} from 'lucide-react';
+import athleticTechTheme from '@/lib/athleticTechTheme';
 
 interface VideoAnalysisModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface AnalysisPoint {
-  x: number;
-  y: number;
-  label: string;
-  type: 'joint' | 'marker' | 'angle';
-}
-
-interface FreezeFrameData {
-  timestamp: number;
-  points: AnalysisPoint[];
-  angles: { [key: string]: number };
-  notes: string;
-}
-
-export const VideoAnalysisModal: React.FC<VideoAnalysisModalProps> = ({
-  isOpen,
-  onClose
-}) => {
+const VideoAnalysisModal: React.FC<VideoAnalysisModalProps> = ({ isOpen, onClose }) => {
   const [selectedEvent, setSelectedEvent] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  
+  // Performance recording fields
+  const [result, setResult] = useState('');
+  const [competitionType, setCompetitionType] = useState<'practice' | 'competition'>('practice');
+  const [temperature, setTemperature] = useState(70);
+  const [windSpeed, setWindSpeed] = useState('0.0');
+  const [notes, setNotes] = useState('');
+  
+  // Upload states
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  
+  // Video player states
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [freezeFrames, setFreezeFrames] = useState<FreezeFrameData[]>([]);
-  const [selectedPoints, setSelectedPoints] = useState<AnalysisPoint[]>([]);
-  const [isMarkingMode, setIsMarkingMode] = useState(false);
-  const [currentMarkingType, setCurrentMarkingType] = useState<'joint' | 'marker' | 'angle'>('joint');
   
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const events = {
     'Sprints': ['100m', '200m', '400m', '100m Hurdles', '110m Hurdles', '4x100m Relay', '4x400m Relay'],
@@ -54,22 +53,96 @@ export const VideoAnalysisModal: React.FC<VideoAnalysisModalProps> = ({
     'Distance': ['800m', '1500m', '3000m Steeplechase', '5000m', '10000m']
   };
 
+  // Enhanced file validation
+  const validateFile = (file: File): string | null => {
+    const validVideoTypes = ['video/mp4', 'video/mov', 'video/avi', 'video/webm', 'video/quicktime'];
+    const maxSize = 500 * 1024 * 1024; // 500MB
+    
+    if (!validVideoTypes.includes(file.type)) {
+      return 'Please upload a valid video file (MP4, MOV, AVI, WebM)';
+    }
+    
+    if (file.size > maxSize) {
+      return 'File size must be less than 500MB';
+    }
+    
+    return null;
+  };
+  
+  // Process uploaded file
+  const processFile = async (file: File) => {
+    const error = validateFile(file);
+    if (error) {
+      setUploadError(error);
+      return;
+    }
+    
+    setUploadError(null);
+    setIsUploading(true);
+    setUploadProgress(0);
+    
+    try {
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 200);
+      
+      // Create video URL
+      const url = URL.createObjectURL(file);
+      
+      // Wait for "upload" to complete
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      
+      setTimeout(() => {
+        setSelectedFile(file);
+        setVideoUrl(url);
+        setIsUploading(false);
+        setUploadSuccess(true);
+        
+        // Reset success state after 2 seconds
+        setTimeout(() => setUploadSuccess(false), 2000);
+      }, 500);
+      
+    } catch (error) {
+      setUploadError('Failed to process video file');
+      setIsUploading(false);
+    }
+  };
+  
+  // Drag and drop handlers
+  const onDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  }, []);
+  
+  const onDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  }, []);
+  
+  const onDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      processFile(files[0]);
+    }
+  }, []);
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith('video/') && !file.type.startsWith('image/')) {
-        alert('Please select a video or image file');
-        return;
-      }
-      
-      if (file.size > 100 * 1024 * 1024) {
-        alert('File size must be less than 100MB');
-        return;
-      }
-      
-      setSelectedFile(file);
-      const url = URL.createObjectURL(file);
-      setVideoUrl(url);
+      processFile(file);
     }
   };
 
@@ -96,112 +169,157 @@ export const VideoAnalysisModal: React.FC<VideoAnalysisModalProps> = ({
     }
   };
 
-  const seekToTime = (time: number) => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = time;
-      setCurrentTime(time);
-    }
-  };
-
-  const captureFrame = () => {
-    if (videoRef.current && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        canvas.width = videoRef.current.videoWidth;
-        canvas.height = videoRef.current.videoHeight;
-        ctx.drawImage(videoRef.current, 0, 0);
-        
-        const newFrame: FreezeFrameData = {
-          timestamp: currentTime,
-          points: [...selectedPoints],
-          angles: {},
-          notes: ''
-        };
-        
-        setFreezeFrames(prev => [...prev, newFrame]);
-        setIsMarkingMode(true);
+  const getEventSpecificMetrics = (event: string) => {
+    const eventMetrics: { [key: string]: any } = {
+      'Triple Jump': {
+        phases: [
+          { phase: 'Approach Speed', score: 8.2, feedback: 'Excellent acceleration with consistent rhythm throughout the approach run.', color: athleticTechTheme.colors.performance.excellent },
+          { phase: 'Hop Distance', score: 7.8, feedback: 'Good hop distance with strong takeoff, but slight imbalance affects optimal distance.', color: athleticTechTheme.colors.performance.good },
+          { phase: 'Step Distance', score: 7.5, feedback: 'Step phase shows good technique but could benefit from more aggressive forward momentum.', color: athleticTechTheme.colors.performance.good },
+          { phase: 'Jump Distance', score: 8.0, feedback: 'Final jump demonstrates excellent technique with good landing preparation.', color: athleticTechTheme.colors.performance.excellent }
+        ],
+        comparison: [
+          { metric: 'Approach Speed', userValue: 9.2, eliteValue: 10.1, percentile: 78 },
+          { metric: 'Hop Distance', userValue: 5.8, eliteValue: 6.4, percentile: 72 },
+          { metric: 'Step Distance', userValue: 4.2, eliteValue: 4.8, percentile: 75 },
+          { metric: 'Jump Distance', userValue: 4.8, eliteValue: 5.2, percentile: 80 },
+          { metric: 'Total Distance', userValue: 14.8, eliteValue: 16.4, percentile: 76 }
+        ]
+      },
+      'Pole Vault': {
+        phases: [
+          { phase: 'Approach Speed', score: 8.5, feedback: 'Excellent speed development with consistent acceleration pattern.', color: athleticTechTheme.colors.performance.excellent },
+          { phase: 'Plant & Takeoff', score: 7.2, feedback: 'Good plant technique but timing could be improved for optimal energy transfer.', color: athleticTechTheme.colors.performance.good },
+          { phase: 'Swing & Inversion', score: 7.8, feedback: 'Strong swing phase with good body position during inversion.', color: athleticTechTheme.colors.performance.good },
+          { phase: 'Extension & Clearance', score: 8.1, feedback: 'Excellent extension and bar clearance with controlled landing.', color: athleticTechTheme.colors.performance.excellent }
+        ],
+        comparison: [
+          { metric: 'Approach Speed', userValue: 9.8, eliteValue: 10.5, percentile: 82 },
+          { metric: 'Plant Angle', userValue: 18.5, eliteValue: 20.2, percentile: 78 },
+          { metric: 'Pole Bend', userValue: 4.2, eliteValue: 4.8, percentile: 75 },
+          { metric: 'Height Cleared', userValue: 4.60, eliteValue: 5.20, percentile: 73 }
+        ]
+      },
+      'High Jump': {
+        phases: [
+          { phase: 'Approach', score: 8.0, feedback: 'The approach was consistent with good speed, but there is room for improvement in the rhythm to enhance the take-off.', color: athleticTechTheme.colors.performance.excellent },
+          { phase: 'Take-off', score: 7.0, feedback: 'The take-off showed strong power, but the timing was slightly off, affecting the height achieved.', color: athleticTechTheme.colors.performance.good },
+          { phase: 'Flight', score: 7.5, feedback: 'Body control was good, but the arching technique needs refinement to maximize clearance.', color: athleticTechTheme.colors.performance.good },
+          { phase: 'Landing', score: 8.0, feedback: 'Landing was controlled and safe, with minimal impact on performance.', color: athleticTechTheme.colors.performance.excellent }
+        ],
+        comparison: [
+          { metric: 'Height Cleared', userValue: 2.02, eliteValue: 2.4, percentile: 70 },
+          { metric: 'Approach Speed', userValue: 8.5, eliteValue: 9.5, percentile: 80 },
+          { metric: 'Take-off Power', userValue: 7.8, eliteValue: 9.0, percentile: 75 },
+          { metric: 'Body Control', userValue: 7.5, eliteValue: 8.5, percentile: 70 }
+        ]
+      },
+      'Long Jump': {
+        phases: [
+          { phase: 'Approach Speed', score: 8.3, feedback: 'Excellent acceleration with consistent speed maintenance through approach.', color: athleticTechTheme.colors.performance.excellent },
+          { phase: 'Takeoff', score: 7.6, feedback: 'Good takeoff technique with strong vertical impulse, slight forward lean could be improved.', color: athleticTechTheme.colors.performance.good },
+          { phase: 'Flight', score: 7.9, feedback: 'Strong flight technique with good body position and landing preparation.', color: athleticTechTheme.colors.performance.good },
+          { phase: 'Landing', score: 8.2, feedback: 'Excellent landing technique maximizing distance with controlled finish.', color: athleticTechTheme.colors.performance.excellent }
+        ],
+        comparison: [
+          { metric: 'Approach Speed', userValue: 9.5, eliteValue: 10.2, percentile: 82 },
+          { metric: 'Takeoff Angle', userValue: 18.2, eliteValue: 20.0, percentile: 75 },
+          { metric: 'Flight Distance', userValue: 6.45, eliteValue: 7.20, percentile: 78 },
+          { metric: 'Technical Score', userValue: 7.8, eliteValue: 8.9, percentile: 72 }
+        ]
+      },
+      '100m': {
+        phases: [
+          { phase: 'Start', score: 9.0, feedback: 'Outstanding reaction time and explosive drive phase with optimal body angle.', color: athleticTechTheme.colors.performance.excellent },
+          { phase: 'Acceleration', score: 8.5, feedback: 'Strong acceleration with good progressive upright transition.', color: athleticTechTheme.colors.performance.excellent },
+          { phase: 'Max Velocity', score: 8.8, feedback: 'Excellent top speed with efficient mechanics and relaxed running.', color: athleticTechTheme.colors.performance.excellent },
+          { phase: 'Finish', score: 6.5, feedback: 'Noticeable deceleration in final phase - focus on speed endurance.', color: athleticTechTheme.colors.performance.average }
+        ],
+        comparison: [
+          { metric: 'Reaction Time', userValue: 0.142, eliteValue: 0.130, percentile: 85 },
+          { metric: '30m Split', userValue: 3.95, eliteValue: 3.78, percentile: 82 },
+          { metric: 'Top Speed', userValue: 11.8, eliteValue: 12.2, percentile: 88 },
+          { metric: 'Final Time', userValue: 10.85, eliteValue: 9.58, percentile: 75 }
+        ]
       }
-    }
-  };
-
-  const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isMarkingMode || !canvasRef.current) return;
-    
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * canvas.width;
-    const y = ((event.clientY - rect.top) / rect.height) * canvas.height;
-    
-    const newPoint: AnalysisPoint = {
-      x,
-      y,
-      label: `${currentMarkingType}_${selectedPoints.length + 1}`,
-      type: currentMarkingType
     };
     
-    setSelectedPoints(prev => [...prev, newPoint]);
+    return eventMetrics[event] || eventMetrics['High Jump'];
   };
-
-  const drawAnalysisPoints = () => {
-    if (!canvasRef.current) return;
+  
+  const generateAnalysis = (event: string, result: string) => {
+    const eventData = getEventSpecificMetrics(event);
     
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    selectedPoints.forEach((point) => {
-      ctx.fillStyle = point.type === 'joint' ? '#ff0000' : point.type === 'marker' ? '#00ff00' : '#0000ff';
-      ctx.beginPath();
-      ctx.arc(point.x, point.y, 8, 0, 2 * Math.PI);
-      ctx.fill();
-      
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '12px Arial';
-      ctx.fillText(point.label, point.x + 10, point.y - 10);
-    });
+    return {
+      event: event,
+      result: result,
+      overallScore: 7.8,
+      strengths: [
+        'Consistent technical execution',
+        'Strong power development',
+        'Good competitive mindset'
+      ],
+      focusAreas: [
+        'Timing optimization needed',
+        'Technique refinement opportunities',
+        'Consistency under pressure'
+      ],
+      recommendations: [
+        '**Technical Drills:** Focus on event-specific technique drills to improve weak phases.',
+        '**Strength Training:** Implement targeted strength training for power development.',
+        '**Mental Training:** Work on competition focus and pressure management.',
+        '**Video Review:** Regular video analysis to track technical improvements.'
+      ],
+      technicalBreakdown: eventData.phases,
+      comparison: eventData.comparison
+    };
   };
-
-  React.useEffect(() => {
-    drawAnalysisPoints();
-  }, [selectedPoints]);
 
   const analyzeVideo = async () => {
     if (!selectedEvent || !selectedFile) {
-      alert('Please select an event and upload a file');
+      setUploadError('Please select an event and upload a video');
+      return;
+    }
+    
+    if (!result) {
+      setUploadError('Please enter your performance result');
       return;
     }
 
     setIsAnalyzing(true);
-    
+
     try {
+      // Simulate AI analysis
       await new Promise(resolve => setTimeout(resolve, 3000));
+
+      const analysis = generateAnalysis(selectedEvent, result);
       
-      const mockAnalysis = {
-        overall_score: 7.5,
-        technique_breakdown: {
-          phases: [
-            { phase: 'Approach', score: 8.0, analysis: 'Good speed development and rhythm consistency' },
-            { phase: 'Plant/Takeoff', score: 7.0, analysis: 'Solid technique but room for improvement in vertical impulse' },
-            { phase: 'Flight', score: 7.5, analysis: 'Good body position maintenance throughout flight' }
-          ]
+      // Save performance data to profile (this would typically go to a database)
+      const performanceRecord = {
+        id: Date.now().toString(),
+        event: selectedEvent,
+        result: result,
+        competitionType: competitionType,
+        weather: {
+          temperature: temperature,
+          windSpeed: windSpeed
         },
-        biomechanical_insights: [
-          'Joint angles within optimal range during takeoff phase',
-          'Slight forward lean could be improved for better distance',
-          'Arm swing coordination is excellent'
-        ],
-        recommendations: [
-          'Focus on plyometric exercises to improve takeoff power',
-          'Work on core strength for better flight position',
-          'Practice approach consistency drills'
-        ]
+        notes: notes,
+        videoFile: selectedFile.name,
+        analysis: analysis,
+        date: new Date().toISOString()
       };
       
-      setAnalysisResult(mockAnalysis);
+      // Store in localStorage for demo (in real app, this would go to Supabase)
+      const existingRecords = JSON.parse(localStorage.getItem('performanceRecords') || '[]');
+      existingRecords.push(performanceRecord);
+      localStorage.setItem('performanceRecords', JSON.stringify(existingRecords));
+      
+      console.log('Performance record saved:', performanceRecord);
+
+      setAnalysisResult(analysis);
     } catch (error) {
-      console.error('Analysis error:', error);
-      alert('Failed to analyze video. Please try again.');
+      setUploadError('Failed to analyze video. Please try again.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -210,12 +328,26 @@ export const VideoAnalysisModal: React.FC<VideoAnalysisModalProps> = ({
   const resetModal = () => {
     setSelectedEvent('');
     setSelectedFile(null);
-    setAnalysisResult(null);
-    setIsAnalyzing(false);
     setVideoUrl(null);
-    setFreezeFrames([]);
-    setSelectedPoints([]);
-    setIsMarkingMode(false);
+    setIsAnalyzing(false);
+    setAnalysisResult(null);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+    
+    // Reset performance recording fields
+    setResult('');
+    setCompetitionType('practice');
+    setTemperature(70);
+    setWindSpeed('0.0');
+    setNotes('');
+    
+    // Reset upload states
+    setIsDragOver(false);
+    setUploadProgress(0);
+    setIsUploading(false);
+    setUploadError(null);
+    setUploadSuccess(false);
   };
 
   const handleClose = () => {
@@ -223,336 +355,485 @@ export const VideoAnalysisModal: React.FC<VideoAnalysisModalProps> = ({
     onClose();
   };
 
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Play className="h-5 w-5 text-blue-600" />
-            Freeze Frame Video Analysis
+      <DialogContent className="max-w-6xl h-[90vh] flex flex-col" style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}>
+        <DialogHeader className="border-b pb-4" style={{ borderColor: athleticTechTheme.colors.interactive.border }}>
+          <DialogTitle className="flex items-center gap-3" style={{ color: athleticTechTheme.colors.text.primary }}>
+            <div 
+              className="p-2 rounded-xl"
+              style={{ background: athleticTechTheme.gradients.tech }}
+            >
+              <Video className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <span className="text-xl font-bold">AI Video Analysis</span>
+              <p className="text-sm font-normal" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                Upload your performance video for detailed technical analysis
+              </p>
+            </div>
           </DialogTitle>
         </DialogHeader>
 
-        {!analysisResult ? (
-          <div className="space-y-6">
-            {/* Event Selection */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Select Event Category & Type</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {Object.entries(events).map(([category, eventList]) => (
-                    <div key={category} className="space-y-2">
-                      <h4 className="font-medium text-sm text-gray-600">{category}</h4>
-                      <Select value={selectedEvent} onValueChange={setSelectedEvent}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder={`Select ${category}`} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {eventList.map(event => (
-                            <SelectItem key={event} value={event}>{event}</SelectItem>
+        <div className="flex-1 overflow-y-auto p-6">
+          {!analysisResult ? (
+            <div className="space-y-6">
+              {/* Event Selection */}
+              <Card className="border-0 shadow-lg" style={{ backgroundColor: athleticTechTheme.colors.surface.secondary }}>
+                <CardHeader>
+                  <CardTitle style={{ color: athleticTechTheme.colors.text.primary }}>
+                    Select Event
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Select value={selectedEvent} onValueChange={setSelectedEvent}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Choose your event" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(events).map(([category, eventList]) => (
+                        <div key={category}>
+                          <div className="px-2 py-1 text-sm font-semibold text-gray-500">
+                            {category}
+                          </div>
+                          {eventList.map((event) => (
+                            <SelectItem key={event} value={event}>
+                              {event}
+                            </SelectItem>
                           ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                        </div>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </CardContent>
+              </Card>
 
-            {/* Video Upload */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Upload className="h-5 w-5" />
-                  Upload Video or Image
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
-                  <input
-                    type="file"
-                    accept="video/*,image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                    id="file-upload"
-                  />
-                  <label htmlFor="file-upload" className="cursor-pointer">
+              {/* Video Upload */}
+              <Card className="border-0 shadow-lg" style={{ backgroundColor: athleticTechTheme.colors.surface.secondary }}>
+                <CardHeader>
+                  <CardTitle style={{ color: athleticTechTheme.colors.text.primary }}>
+                    Upload Video
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {!selectedFile ? (
+                    <div
+                      className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 cursor-pointer ${
+                        isDragOver 
+                          ? 'border-blue-400 bg-blue-50' 
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                      onDragOver={onDragOver}
+                      onDragLeave={onDragLeave}
+                      onDrop={onDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="video/*"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                      
+                      {isUploading ? (
+                        <div className="space-y-4">
+                          <div 
+                            className="w-16 h-16 rounded-full mx-auto flex items-center justify-center"
+                            style={{ backgroundColor: `${athleticTechTheme.colors.primary.track}20` }}
+                          >
+                            <Upload className="h-8 w-8 animate-pulse" style={{ color: athleticTechTheme.colors.primary.track }} />
+                          </div>
+                          <div>
+                            <p className="text-lg font-semibold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                              Uploading Video...
+                            </p>
+                            <Progress value={uploadProgress} className="w-full max-w-xs mx-auto" />
+                            <p className="text-sm mt-2" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                              {uploadProgress}% complete
+                            </p>
+                          </div>
+                        </div>
+                      ) : uploadSuccess ? (
+                        <div className="space-y-4">
+                          <div 
+                            className="w-16 h-16 rounded-full mx-auto flex items-center justify-center"
+                            style={{ backgroundColor: `${athleticTechTheme.colors.performance.excellent}20` }}
+                          >
+                            <CheckCircle className="h-8 w-8" style={{ color: athleticTechTheme.colors.performance.excellent }} />
+                          </div>
+                          <p className="text-lg font-semibold" style={{ color: athleticTechTheme.colors.performance.excellent }}>
+                            Upload Successful!
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div 
+                            className="w-16 h-16 rounded-full mx-auto flex items-center justify-center"
+                            style={{ backgroundColor: `${athleticTechTheme.colors.primary.track}20` }}
+                          >
+                            <FileVideo className="h-8 w-8" style={{ color: athleticTechTheme.colors.primary.track }} />
+                          </div>
+                          <div>
+                            <p className="text-lg font-semibold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                              Drop your video here or click to browse
+                            </p>
+                            <p className="text-sm" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                              Supports MP4, MOV, AVI, WebM • Max 500MB
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {uploadError && (
+                        <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: `${athleticTechTheme.colors.performance.poor}10` }}>
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4" style={{ color: athleticTechTheme.colors.performance.poor }} />
+                            <p className="text-sm" style={{ color: athleticTechTheme.colors.performance.poor }}>
+                              {uploadError}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
                     <div className="space-y-4">
-                      <div className="flex justify-center">
-                        <div className="p-4 bg-blue-100 rounded-full">
-                          <Camera className="h-8 w-8 text-blue-600" />
+                      {/* Video Preview */}
+                      <div className="relative rounded-xl overflow-hidden" style={{ backgroundColor: '#000' }}>
+                        <video
+                          ref={videoRef}
+                          src={videoUrl || undefined}
+                          className="w-full h-64 object-contain"
+                          onLoadedMetadata={handleVideoLoad}
+                          onTimeUpdate={handleTimeUpdate}
+                        />
+                        
+                        {/* Video Controls */}
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                          <div className="flex items-center gap-4">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={togglePlayPause}
+                              className="text-white hover:bg-white/20"
+                            >
+                              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                            </Button>
+                            
+                            <div className="flex-1 flex items-center gap-2">
+                              <span className="text-white text-sm">{formatTime(currentTime)}</span>
+                              <div className="flex-1 bg-white/20 rounded-full h-1">
+                                <div 
+                                  className="h-1 rounded-full transition-all duration-300"
+                                  style={{ 
+                                    width: `${(currentTime / duration) * 100}%`,
+                                    backgroundColor: athleticTechTheme.colors.primary.track
+                                  }}
+                                />
+                              </div>
+                              <span className="text-white text-sm">{formatTime(duration)}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div>
-                        <p className="text-lg font-medium text-gray-900">
-                          {selectedFile ? selectedFile.name : 'Click to upload or drag and drop'}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Video files up to 100MB or images up to 10MB
-                        </p>
+                      
+                      {/* File Info */}
+                      <div className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}>
+                        <div className="flex items-center gap-3">
+                          <div 
+                            className="p-2 rounded-lg"
+                            style={{ backgroundColor: `${athleticTechTheme.colors.performance.excellent}20` }}
+                          >
+                            <CheckCircle className="h-5 w-5" style={{ color: athleticTechTheme.colors.performance.excellent }} />
+                          </div>
+                          <div>
+                            <p className="font-semibold" style={{ color: athleticTechTheme.colors.text.primary }}>
+                              {selectedFile.name}
+                            </p>
+                            <p className="text-sm" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                              {(selectedFile.size / (1024 * 1024)).toFixed(1)} MB
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedFile(null);
+                            setVideoUrl(null);
+                            setUploadSuccess(false);
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                  </label>
-                </div>
+                  )}
+                </CardContent>
+              </Card>
 
-                {selectedFile && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 text-green-800">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="font-medium">File uploaded successfully</span>
+              {/* Performance Recording */}
+              <Card className="border-0 shadow-lg" style={{ backgroundColor: athleticTechTheme.colors.surface.secondary }}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                    <Target className="h-5 w-5" style={{ color: athleticTechTheme.colors.primary.track }} />
+                    Performance Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Result Input */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" style={{ color: athleticTechTheme.colors.text.primary }}>
+                      Result *
+                    </label>
+                    <input
+                      type="text"
+                      value={result}
+                      onChange={(e) => setResult(e.target.value)}
+                      placeholder="e.g., 10.85s, 6.45m, 2.02m, 14.8m (for triple jump)"
+                      className="w-full px-4 py-3 text-lg rounded-xl border border-gray-300 focus:border-blue-500 focus:outline-none"
+                      style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}
+                    />
+                  </div>
+
+                  {/* Competition Type */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium" style={{ color: athleticTechTheme.colors.text.primary }}>
+                      Type
+                    </label>
+                    <div className="flex gap-3">
+                      <Button
+                        type="button"
+                        variant={competitionType === 'practice' ? 'default' : 'outline'}
+                        onClick={() => setCompetitionType('practice')}
+                        className="flex-1"
+                        style={competitionType === 'practice' ? { 
+                          backgroundColor: athleticTechTheme.colors.primary.track,
+                          color: 'white'
+                        } : {}}
+                      >
+                        Practice
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={competitionType === 'competition' ? 'default' : 'outline'}
+                        onClick={() => setCompetitionType('competition')}
+                        className="flex-1"
+                        style={competitionType === 'competition' ? { 
+                          backgroundColor: athleticTechTheme.colors.events.jumps,
+                          color: 'white'
+                        } : {}}
+                      >
+                        Competition
+                      </Button>
                     </div>
-                    <p className="text-sm text-green-700 mt-1">
-                      Size: {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                  </div>
+
+                  {/* Weather Conditions */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium flex items-center gap-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                      <Wind className="h-4 w-4" />
+                      Weather Conditions
+                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-xs" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                          Temperature (°F)
+                        </label>
+                        <input
+                          type="number"
+                          value={temperature}
+                          onChange={(e) => setTemperature(parseInt(e.target.value))}
+                          className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none"
+                          style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                          Wind Speed (m/s)
+                        </label>
+                        <input
+                          type="text"
+                          value={windSpeed}
+                          onChange={(e) => setWindSpeed(e.target.value)}
+                          placeholder="+1.2"
+                          className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none"
+                          style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Notes */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium" style={{ color: athleticTechTheme.colors.text.primary }}>
+                      Notes (Optional)
+                    </label>
+                    <textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="How did you feel? Any observations about technique or conditions?"
+                      rows={3}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:outline-none resize-none"
+                      style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Analyze Button */}
+              <Button
+                onClick={analyzeVideo}
+                disabled={!selectedEvent || !selectedFile || !result || isAnalyzing}
+                className="w-full py-6 text-lg font-semibold rounded-xl"
+                style={{ 
+                  background: athleticTechTheme.gradients.speed,
+                  color: 'white'
+                }}
+                size="lg"
+              >
+                {isAnalyzing ? (
+                  <>
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                    Analyzing Performance...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-6 w-6 mr-3" />
+                    Get AI Analysis
+                  </>
+                )}
+              </Button>
+            </div>
+          ) : (
+            /* Analysis Results */
+            <div className="space-y-6">
+              {/* Overall Score */}
+              <Card className="border-0 shadow-lg" style={{ backgroundColor: athleticTechTheme.colors.surface.secondary }}>
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <div 
+                      className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-black text-white"
+                      style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
+                    >
+                      {analysisResult.overallScore}
+                    </div>
+                    <h3 className="text-2xl font-bold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                      {analysisResult.event} Analysis
+                    </h3>
+                    <p style={{ color: athleticTechTheme.colors.text.secondary }}>
+                      Strong performance with clear areas for improvement
                     </p>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Video Player and Freeze Frame Analysis */}
-            {videoUrl && (
-              <Card>
+              {/* Technical Breakdown */}
+              <Card className="border-0 shadow-lg" style={{ backgroundColor: athleticTechTheme.colors.surface.secondary }}>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Play className="h-5 w-5" />
-                    Freeze Frame Analysis
+                  <CardTitle style={{ color: athleticTechTheme.colors.text.primary }}>
+                    Technical Breakdown
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <Tabs defaultValue="player" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="player">Video Player</TabsTrigger>
-                      <TabsTrigger value="analysis">Frame Analysis</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="player" className="space-y-4">
-                      <div className="relative bg-black rounded-lg overflow-hidden">
-                        <video
-                          ref={videoRef}
-                          src={videoUrl}
-                          className="w-full h-auto max-h-96"
-                          onLoadedMetadata={handleVideoLoad}
-                          onTimeUpdate={handleTimeUpdate}
-                          onPlay={() => setIsPlaying(true)}
-                          onPause={() => setIsPlaying(false)}
-                        />
+                  {analysisResult.technicalBreakdown.map((phase: any, index: number) => (
+                    <div key={index} className="p-4 rounded-xl" style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-lg" style={{ color: athleticTechTheme.colors.text.primary }}>
+                          {phase.phase}
+                        </h4>
+                        <Badge 
+                          className="text-white font-bold"
+                          style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
+                        >
+                          {phase.score}/10
+                        </Badge>
                       </div>
-                      
-                      {/* Video Controls */}
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-center gap-4">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => seekToTime(Math.max(0, currentTime - 0.1))}
-                          >
-                            <SkipBack className="h-4 w-4" />
-                          </Button>
-                          
-                          <Button onClick={togglePlayPause} size="lg">
-                            {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-                          </Button>
-                          
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => seekToTime(Math.min(duration, currentTime + 0.1))}
-                          >
-                            <SkipForward className="h-4 w-4" />
-                          </Button>
-                          
-                          <Button
-                            onClick={captureFrame}
-                            className="bg-orange-600 hover:bg-orange-700"
-                          >
-                            <Target className="h-4 w-4 mr-2" />
-                            Capture Frame
-                          </Button>
-                        </div>
-                        
-                        {/* Timeline Slider */}
-                        <div className="space-y-2">
-                          <Slider
-                            value={[currentTime]}
-                            max={duration}
-                            step={0.1}
-                            onValueChange={([value]) => seekToTime(value)}
-                            className="w-full"
-                          />
-                          <div className="flex justify-between text-sm text-gray-500">
-                            <span>{currentTime.toFixed(1)}s</span>
-                            <span>{duration.toFixed(1)}s</span>
-                          </div>
-                        </div>
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="analysis" className="space-y-4">
-                      {freezeFrames.length > 0 ? (
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-4 mb-4">
-                            <h4 className="font-medium">Marking Mode:</h4>
-                            <div className="flex gap-2">
-                              <Button
-                                variant={currentMarkingType === 'joint' ? 'default' : 'outline'}
-                                size="sm"
-                                onClick={() => setCurrentMarkingType('joint')}
-                              >
-                                <Crosshair className="h-4 w-4 mr-1" />
-                                Joints
-                              </Button>
-                              <Button
-                                variant={currentMarkingType === 'marker' ? 'default' : 'outline'}
-                                size="sm"
-                                onClick={() => setCurrentMarkingType('marker')}
-                              >
-                                <Target className="h-4 w-4 mr-1" />
-                                Markers
-                              </Button>
-                              <Button
-                                variant={currentMarkingType === 'angle' ? 'default' : 'outline'}
-                                size="sm"
-                                onClick={() => setCurrentMarkingType('angle')}
-                              >
-                                Angles
-                              </Button>
-                            </div>
-                          </div>
-                          
-                          <div className="relative bg-black rounded-lg overflow-hidden">
-                            <canvas
-                              ref={canvasRef}
-                              onClick={handleCanvasClick}
-                              className="w-full h-auto max-h-96 cursor-crosshair"
-                            />
-                          </div>
-                          
-                          {selectedPoints.length > 0 && (
-                            <div className="bg-blue-50 p-4 rounded-lg">
-                              <h4 className="font-medium mb-2">Analysis Points ({selectedPoints.length})</h4>
-                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
-                                {selectedPoints.map((point, index) => (
-                                  <div key={index} className="flex items-center gap-2">
-                                    <div 
-                                      className={`w-3 h-3 rounded-full ${
-                                        point.type === 'joint' ? 'bg-red-500' : 
-                                        point.type === 'marker' ? 'bg-green-500' : 'bg-blue-500'
-                                      }`}
-                                    />
-                                    <span>{point.label}</span>
-                                  </div>
-                                ))}
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="mt-2"
-                                onClick={() => setSelectedPoints([])}
-                              >
-                                Clear Points
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8 text-gray-500">
-                          <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                          <p>Capture a frame from the video player to start analysis</p>
-                        </div>
-                      )}
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Analyze Button */}
-            <Button
-              onClick={analyzeVideo}
-              disabled={!selectedEvent || !selectedFile || isAnalyzing}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              size="lg"
-            >
-              {isAnalyzing ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Analyzing Video...
-                </>
-              ) : (
-                <>
-                  <Zap className="h-5 w-5 mr-2" />
-                  Analyze Performance
-                </>
-              )}
-            </Button>
-          </div>
-        ) : (
-          /* Analysis Results */
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  Analysis Results - {selectedEvent}
-                  <Badge className="bg-green-100 text-green-800">
-                    {analysisResult.overall_score}/10
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {analysisResult.technique_breakdown.phases.map((phase: any, index: number) => (
-                  <div key={index} className="border-l-4 border-blue-400 pl-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold">{phase.phase}</h4>
-                      <Badge variant="outline">{phase.score}/10</Badge>
+                      <p style={{ color: athleticTechTheme.colors.text.secondary }}>
+                        {phase.feedback}
+                      </p>
+                      <Progress value={(phase.score / 10) * 100} className="mt-3" />
                     </div>
-                    <p className="text-gray-700">{phase.analysis}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Biomechanical Insights</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {analysisResult.biomechanical_insights.map((insight: string, index: number) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span className="text-sm">{insight}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  ))}
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Recommendations</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {analysisResult.recommendations.map((rec: string, index: number) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <span className="text-sm">{rec}</span>
-                      </li>
+              {/* Elite Comparison & Recommendations */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card className="border-0 shadow-lg" style={{ backgroundColor: athleticTechTheme.colors.surface.secondary }}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                      <Target className="h-5 w-5" style={{ color: athleticTechTheme.colors.events.jumps }} />
+                      Elite Comparison
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {analysisResult.comparison.map((metric: any, index: number) => (
+                      <div key={index}>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium" style={{ color: athleticTechTheme.colors.text.primary }}>
+                            {metric.metric}
+                          </span>
+                          <span className="text-sm" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                            {metric.percentile}th percentile
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm mb-2">
+                          <span>You: <strong>{metric.userValue}</strong></span>
+                          <span>Elite: <strong>{metric.eliteValue}</strong></span>
+                        </div>
+                        <Progress value={metric.percentile} className="h-2" />
+                      </div>
                     ))}
-                  </ul>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-lg" style={{ backgroundColor: athleticTechTheme.colors.surface.secondary }}>
+                  <CardHeader>
+                    <CardTitle style={{ color: athleticTechTheme.colors.text.primary }}>
+                      Priority Recommendations
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3">
+                      {analysisResult.recommendations.map((rec: string, index: number) => (
+                        <li key={index} className="flex items-start gap-3 p-3 rounded-lg" style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}>
+                          <div 
+                            className="w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold mt-0.5"
+                            style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
+                          >
+                            {index + 1}
+                          </div>
+                          <span className="text-sm" style={{ color: athleticTechTheme.colors.text.primary }}>
+                            {rec}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Button 
+                onClick={resetModal} 
+                variant="outline" 
+                className="w-full py-4 text-lg"
+                style={{ borderColor: athleticTechTheme.colors.interactive.border }}
+              >
+                Analyze Another Video
+              </Button>
             </div>
-
-            <Button onClick={resetModal} variant="outline" className="w-full">
-              Analyze Another Video
-            </Button>
-          </div>
-        )}
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
 };
+
+export { VideoAnalysisModal };
