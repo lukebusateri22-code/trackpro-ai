@@ -1,0 +1,692 @@
+// Database Types for TrackPro AI
+// Generated from Supabase schema
+
+export interface Database {
+  public: {
+    Tables: {
+      profiles: {
+        Row: {
+          id: string;
+          username: string;
+          full_name: string | null;
+          avatar_url: string | null;
+          role: 'athlete' | 'coach' | 'admin';
+          age: number | null;
+          height: string | null;
+          weight: string | null;
+          experience_level: 'beginner' | 'intermediate' | 'advanced' | 'elite';
+          primary_events: string[] | null;
+          bio: string | null;
+          location: string | null;
+          phone: string | null;
+          emergency_contact: any | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          username: string;
+          full_name?: string | null;
+          avatar_url?: string | null;
+          role?: 'athlete' | 'coach' | 'admin';
+          age?: number | null;
+          height?: string | null;
+          weight?: string | null;
+          experience_level?: 'beginner' | 'intermediate' | 'advanced' | 'elite';
+          primary_events?: string[] | null;
+          bio?: string | null;
+          location?: string | null;
+          phone?: string | null;
+          emergency_contact?: any | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          username?: string;
+          full_name?: string | null;
+          avatar_url?: string | null;
+          role?: 'athlete' | 'coach' | 'admin';
+          age?: number | null;
+          height?: string | null;
+          weight?: string | null;
+          experience_level?: 'beginner' | 'intermediate' | 'advanced' | 'elite';
+          primary_events?: string[] | null;
+          bio?: string | null;
+          location?: string | null;
+          phone?: string | null;
+          emergency_contact?: any | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      coach_athlete_relationships: {
+        Row: {
+          id: string;
+          coach_id: string;
+          athlete_id: string;
+          status: 'pending' | 'active' | 'inactive';
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          coach_id: string;
+          athlete_id: string;
+          status?: 'pending' | 'active' | 'inactive';
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          coach_id?: string;
+          athlete_id?: string;
+          status?: 'pending' | 'active' | 'inactive';
+          created_at?: string;
+        };
+      };
+      training_plans: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          coach_id: string;
+          athlete_id: string | null;
+          event_focus: string;
+          phase: 'base' | 'build' | 'peak' | 'recovery' | 'competition';
+          duration_weeks: number;
+          goals: string[] | null;
+          status: 'draft' | 'active' | 'completed' | 'archived';
+          start_date: string | null;
+          end_date: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string | null;
+          coach_id: string;
+          athlete_id?: string | null;
+          event_focus: string;
+          phase?: 'base' | 'build' | 'peak' | 'recovery' | 'competition';
+          duration_weeks?: number;
+          goals?: string[] | null;
+          status?: 'draft' | 'active' | 'completed' | 'archived';
+          start_date?: string | null;
+          end_date?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string | null;
+          coach_id?: string;
+          athlete_id?: string | null;
+          event_focus?: string;
+          phase?: 'base' | 'build' | 'peak' | 'recovery' | 'competition';
+          duration_weeks?: number;
+          goals?: string[] | null;
+          status?: 'draft' | 'active' | 'completed' | 'archived';
+          start_date?: string | null;
+          end_date?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      training_sessions: {
+        Row: {
+          id: string;
+          training_plan_id: string;
+          title: string;
+          description: string | null;
+          session_type: 'track' | 'weights' | 'recovery' | 'technique' | 'competition';
+          scheduled_date: string | null;
+          duration_minutes: number | null;
+          intensity_level: number | null;
+          location: string | null;
+          equipment_needed: string[] | null;
+          weather_conditions: any | null;
+          notes: string | null;
+          status: 'scheduled' | 'in_progress' | 'completed' | 'skipped';
+          completed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          training_plan_id: string;
+          title: string;
+          description?: string | null;
+          session_type: 'track' | 'weights' | 'recovery' | 'technique' | 'competition';
+          scheduled_date?: string | null;
+          duration_minutes?: number | null;
+          intensity_level?: number | null;
+          location?: string | null;
+          equipment_needed?: string[] | null;
+          weather_conditions?: any | null;
+          notes?: string | null;
+          status?: 'scheduled' | 'in_progress' | 'completed' | 'skipped';
+          completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          training_plan_id?: string;
+          title?: string;
+          description?: string | null;
+          session_type?: 'track' | 'weights' | 'recovery' | 'technique' | 'competition';
+          scheduled_date?: string | null;
+          duration_minutes?: number | null;
+          intensity_level?: number | null;
+          location?: string | null;
+          equipment_needed?: string[] | null;
+          weather_conditions?: any | null;
+          notes?: string | null;
+          status?: 'scheduled' | 'in_progress' | 'completed' | 'skipped';
+          completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      exercises: {
+        Row: {
+          id: string;
+          training_session_id: string;
+          name: string;
+          category: 'sprint' | 'distance' | 'jumps' | 'throws' | 'strength' | 'flexibility' | 'plyometric' | 'technique';
+          sets: number | null;
+          reps: number | null;
+          distance_meters: number | null;
+          weight_kg: number | null;
+          rest_seconds: number | null;
+          intensity_percent: number | null;
+          target_time: string | null;
+          actual_time: string | null;
+          notes: string | null;
+          completed: boolean;
+          order_index: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          training_session_id: string;
+          name: string;
+          category: 'sprint' | 'distance' | 'jumps' | 'throws' | 'strength' | 'flexibility' | 'plyometric' | 'technique';
+          sets?: number | null;
+          reps?: number | null;
+          distance_meters?: number | null;
+          weight_kg?: number | null;
+          rest_seconds?: number | null;
+          intensity_percent?: number | null;
+          target_time?: string | null;
+          actual_time?: string | null;
+          notes?: string | null;
+          completed?: boolean;
+          order_index?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          training_session_id?: string;
+          name?: string;
+          category?: 'sprint' | 'distance' | 'jumps' | 'throws' | 'strength' | 'flexibility' | 'plyometric' | 'technique';
+          sets?: number | null;
+          reps?: number | null;
+          distance_meters?: number | null;
+          weight_kg?: number | null;
+          rest_seconds?: number | null;
+          intensity_percent?: number | null;
+          target_time?: string | null;
+          actual_time?: string | null;
+          notes?: string | null;
+          completed?: boolean;
+          order_index?: number;
+          created_at?: string;
+        };
+      };
+      personal_records: {
+        Row: {
+          id: string;
+          athlete_id: string;
+          event: string;
+          performance_value: number;
+          unit: string;
+          competition_name: string | null;
+          location: string | null;
+          date_achieved: string;
+          wind_speed: number | null;
+          temperature: number | null;
+          conditions: string | null;
+          verified: boolean;
+          video_url: string | null;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          athlete_id: string;
+          event: string;
+          performance_value: number;
+          unit: string;
+          competition_name?: string | null;
+          location?: string | null;
+          date_achieved: string;
+          wind_speed?: number | null;
+          temperature?: number | null;
+          conditions?: string | null;
+          verified?: boolean;
+          video_url?: string | null;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          athlete_id?: string;
+          event?: string;
+          performance_value?: number;
+          unit?: string;
+          competition_name?: string | null;
+          location?: string | null;
+          date_achieved?: string;
+          wind_speed?: number | null;
+          temperature?: number | null;
+          conditions?: string | null;
+          verified?: boolean;
+          video_url?: string | null;
+          notes?: string | null;
+          created_at?: string;
+        };
+      };
+      video_analyses: {
+        Row: {
+          id: string;
+          athlete_id: string;
+          coach_id: string | null;
+          event: string;
+          video_url: string;
+          video_filename: string | null;
+          performance_result: string | null;
+          competition_type: 'practice' | 'competition';
+          weather_conditions: any | null;
+          analysis_results: any | null;
+          freeze_frames: any[] | null;
+          main_weakness: string | null;
+          recommendations: string[] | null;
+          overall_score: number | null;
+          technical_scores: any | null;
+          status: 'processing' | 'completed' | 'failed';
+          processed_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          athlete_id: string;
+          coach_id?: string | null;
+          event: string;
+          video_url: string;
+          video_filename?: string | null;
+          performance_result?: string | null;
+          competition_type?: 'practice' | 'competition';
+          weather_conditions?: any | null;
+          analysis_results?: any | null;
+          freeze_frames?: any[] | null;
+          main_weakness?: string | null;
+          recommendations?: string[] | null;
+          overall_score?: number | null;
+          technical_scores?: any | null;
+          status?: 'processing' | 'completed' | 'failed';
+          processed_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          athlete_id?: string;
+          coach_id?: string | null;
+          event?: string;
+          video_url?: string;
+          video_filename?: string | null;
+          performance_result?: string | null;
+          competition_type?: 'practice' | 'competition';
+          weather_conditions?: any | null;
+          analysis_results?: any | null;
+          freeze_frames?: any[] | null;
+          main_weakness?: string | null;
+          recommendations?: string[] | null;
+          overall_score?: number | null;
+          technical_scores?: any | null;
+          status?: 'processing' | 'completed' | 'failed';
+          processed_at?: string | null;
+          created_at?: string;
+        };
+      };
+      goals: {
+        Row: {
+          id: string;
+          athlete_id: string;
+          coach_id: string | null;
+          title: string;
+          description: string | null;
+          event: string | null;
+          goal_type: 'performance' | 'technique' | 'training' | 'competition';
+          target_value: number | null;
+          current_value: number;
+          unit: string | null;
+          target_date: string | null;
+          priority: 'low' | 'medium' | 'high';
+          status: 'active' | 'completed' | 'paused' | 'cancelled';
+          progress_percentage: number;
+          milestones: any[] | null;
+          completed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          athlete_id: string;
+          coach_id?: string | null;
+          title: string;
+          description?: string | null;
+          event?: string | null;
+          goal_type: 'performance' | 'technique' | 'training' | 'competition';
+          target_value?: number | null;
+          current_value?: number;
+          unit?: string | null;
+          target_date?: string | null;
+          priority?: 'low' | 'medium' | 'high';
+          status?: 'active' | 'completed' | 'paused' | 'cancelled';
+          progress_percentage?: number;
+          milestones?: any[] | null;
+          completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          athlete_id?: string;
+          coach_id?: string | null;
+          title?: string;
+          description?: string | null;
+          event?: string | null;
+          goal_type?: 'performance' | 'technique' | 'training' | 'competition';
+          target_value?: number | null;
+          current_value?: number;
+          unit?: string | null;
+          target_date?: string | null;
+          priority?: 'low' | 'medium' | 'high';
+          status?: 'active' | 'completed' | 'paused' | 'cancelled';
+          progress_percentage?: number;
+          milestones?: any[] | null;
+          completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      achievements: {
+        Row: {
+          id: string;
+          athlete_id: string;
+          title: string;
+          description: string | null;
+          icon: string | null;
+          category: 'performance' | 'training' | 'consistency' | 'improvement' | 'competition';
+          rarity: 'bronze' | 'silver' | 'gold' | 'platinum';
+          points: number;
+          unlocked_at: string;
+          related_goal_id: string | null;
+          related_pr_id: string | null;
+        };
+        Insert: {
+          id?: string;
+          athlete_id: string;
+          title: string;
+          description?: string | null;
+          icon?: string | null;
+          category: 'performance' | 'training' | 'consistency' | 'improvement' | 'competition';
+          rarity?: 'bronze' | 'silver' | 'gold' | 'platinum';
+          points?: number;
+          unlocked_at?: string;
+          related_goal_id?: string | null;
+          related_pr_id?: string | null;
+        };
+        Update: {
+          id?: string;
+          athlete_id?: string;
+          title?: string;
+          description?: string | null;
+          icon?: string | null;
+          category?: 'performance' | 'training' | 'consistency' | 'improvement' | 'competition';
+          rarity?: 'bronze' | 'silver' | 'gold' | 'platinum';
+          points?: number;
+          unlocked_at?: string;
+          related_goal_id?: string | null;
+          related_pr_id?: string | null;
+        };
+      };
+      recovery_metrics: {
+        Row: {
+          id: string;
+          athlete_id: string;
+          date: string;
+          sleep_hours: number | null;
+          sleep_quality: number | null;
+          resting_heart_rate: number | null;
+          hrv_score: number | null;
+          stress_level: number | null;
+          energy_level: number | null;
+          mood_score: number | null;
+          soreness_level: number | null;
+          hydration_level: number | null;
+          nutrition_score: number | null;
+          overall_recovery_score: number | null;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          athlete_id: string;
+          date: string;
+          sleep_hours?: number | null;
+          sleep_quality?: number | null;
+          resting_heart_rate?: number | null;
+          hrv_score?: number | null;
+          stress_level?: number | null;
+          energy_level?: number | null;
+          mood_score?: number | null;
+          soreness_level?: number | null;
+          hydration_level?: number | null;
+          nutrition_score?: number | null;
+          overall_recovery_score?: number | null;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          athlete_id?: string;
+          date?: string;
+          sleep_hours?: number | null;
+          sleep_quality?: number | null;
+          resting_heart_rate?: number | null;
+          hrv_score?: number | null;
+          stress_level?: number | null;
+          energy_level?: number | null;
+          mood_score?: number | null;
+          soreness_level?: number | null;
+          hydration_level?: number | null;
+          nutrition_score?: number | null;
+          overall_recovery_score?: number | null;
+          notes?: string | null;
+          created_at?: string;
+        };
+      };
+      chat_messages: {
+        Row: {
+          id: string;
+          sender_id: string;
+          recipient_id: string;
+          message_type: 'ai_coach' | 'coach_athlete' | 'system';
+          content: string;
+          metadata: any | null;
+          read_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          sender_id: string;
+          recipient_id: string;
+          message_type: 'ai_coach' | 'coach_athlete' | 'system';
+          content: string;
+          metadata?: any | null;
+          read_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          sender_id?: string;
+          recipient_id?: string;
+          message_type?: 'ai_coach' | 'coach_athlete' | 'system';
+          content?: string;
+          metadata?: any | null;
+          read_at?: string | null;
+          created_at?: string;
+        };
+      };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          message: string;
+          type: 'training' | 'goal' | 'achievement' | 'coach' | 'system';
+          priority: 'low' | 'medium' | 'high';
+          action_url: string | null;
+          read_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title: string;
+          message: string;
+          type: 'training' | 'goal' | 'achievement' | 'coach' | 'system';
+          priority?: 'low' | 'medium' | 'high';
+          action_url?: string | null;
+          read_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          title?: string;
+          message?: string;
+          type?: 'training' | 'goal' | 'achievement' | 'coach' | 'system';
+          priority?: 'low' | 'medium' | 'high';
+          action_url?: string | null;
+          read_at?: string | null;
+          created_at?: string;
+        };
+      };
+      competitions: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          location: string | null;
+          start_date: string;
+          end_date: string | null;
+          events: string[] | null;
+          competition_level: 'local' | 'regional' | 'national' | 'international';
+          registration_deadline: string | null;
+          website_url: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          location?: string | null;
+          start_date: string;
+          end_date?: string | null;
+          events?: string[] | null;
+          competition_level: 'local' | 'regional' | 'national' | 'international';
+          registration_deadline?: string | null;
+          website_url?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          location?: string | null;
+          start_date?: string;
+          end_date?: string | null;
+          events?: string[] | null;
+          competition_level?: 'local' | 'regional' | 'national' | 'international';
+          registration_deadline?: string | null;
+          website_url?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+      };
+      competition_entries: {
+        Row: {
+          id: string;
+          competition_id: string;
+          athlete_id: string;
+          events: string[];
+          status: 'registered' | 'confirmed' | 'withdrawn';
+          seed_times: any | null;
+          results: any | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          competition_id: string;
+          athlete_id: string;
+          events: string[];
+          status?: 'registered' | 'confirmed' | 'withdrawn';
+          seed_times?: any | null;
+          results?: any | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          competition_id?: string;
+          athlete_id?: string;
+          events?: string[];
+          status?: 'registered' | 'confirmed' | 'withdrawn';
+          seed_times?: any | null;
+          results?: any | null;
+          created_at?: string;
+        };
+      };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+  };
+}
+
+// Helper types
+export type Profile = Database['public']['Tables']['profiles']['Row'];
+export type TrainingPlan = Database['public']['Tables']['training_plans']['Row'];
+export type TrainingSession = Database['public']['Tables']['training_sessions']['Row'];
+export type Exercise = Database['public']['Tables']['exercises']['Row'];
+export type PersonalRecord = Database['public']['Tables']['personal_records']['Row'];
+export type VideoAnalysis = Database['public']['Tables']['video_analyses']['Row'];
+export type Goal = Database['public']['Tables']['goals']['Row'];
+export type Achievement = Database['public']['Tables']['achievements']['Row'];
+export type RecoveryMetric = Database['public']['Tables']['recovery_metrics']['Row'];
+export type ChatMessage = Database['public']['Tables']['chat_messages']['Row'];
+export type Notification = Database['public']['Tables']['notifications']['Row'];
+export type Competition = Database['public']['Tables']['competitions']['Row'];
+export type CompetitionEntry = Database['public']['Tables']['competition_entries']['Row'];
+export type CoachAthleteRelationship = Database['public']['Tables']['coach_athlete_relationships']['Row'];

@@ -1,79 +1,153 @@
-# TrackPro AI - Elite Track & Field Analysis App
+# TrackPro AI - Complete Track & Field Training Platform
 
-A comprehensive track and field performance analysis and training management application built with modern web technologies. Designed for elite athletes, coaches, and track & field enthusiasts.
+**The ultimate AI-powered training platform for track and field athletes and coaches.**
 
-![TrackPro AI](https://img.shields.io/badge/TrackPro-AI-blue?style=for-the-badge)
-![React](https://img.shields.io/badge/React-18.2.0-blue?style=for-the-badge&logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)
-![Vite](https://img.shields.io/badge/Vite-5.0-blue?style=for-the-badge&logo=vite)
+A comprehensive, production-ready platform featuring advanced video analysis, AI coaching, training management, and performance analytics. Built with modern web technologies and ready for mobile deployment.
 
-## 🏃‍♂️ Features
+[![React](https://img.shields.io/badge/React-18+-blue.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue.svg)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-Backend-green.svg)](https://supabase.com/)
+[![Capacitor](https://img.shields.io/badge/Capacitor-Mobile-purple.svg)](https://capacitorjs.com/)
+[![Vite](https://img.shields.io/badge/Vite-Build-yellow.svg)](https://vitejs.dev/)
 
-### 🎯 Core Functionality
-- **Video Analysis**: Advanced freeze-frame analysis with biomechanical marking
-- **Performance Tracking**: Comprehensive performance recording and analysis
-- **Training Management**: Complete workout planning and execution tracking
-- **Recovery Monitoring**: Health metrics and wellness tracking
-- **Goal Setting**: SMART goals with milestone tracking and achievements
-- **AI Coach**: Intelligent coaching recommendations and insights
+## ✨ Key Features
 
-### 📊 Analytics & Insights
-- **Performance Analytics**: Detailed statistics and progress tracking
-- **Recovery Trends**: 7-day recovery score analysis
-- **Training Load**: RPE tracking and workout distribution
-- **Personal Records**: Event-specific PB tracking with historical data
-- **Achievement System**: Unlockable badges and milestones
+### 🎥 **Advanced Video Analysis**
+- **Freeze Frame Analysis** - Frame-by-frame technique breakdown
+- **Event-Specific Metrics** - Detailed analysis for all 23 track & field events
+- **Main Weakness Detection** - AI identifies your biggest technique issues
+- **Performance Recording** - Unified video + performance data capture
+- **Weather Integration** - Track conditions impact on performance
 
-### 🏃‍♀️ Track & Field Events
-- **All 23 Events**: Complete coverage across 4 categories
-  - **Sprints**: 100m, 200m, 400m, Hurdles, Relays
-  - **Jumps**: Long Jump, Triple Jump, High Jump, Pole Vault
-  - **Throws**: Shot Put, Discus, Hammer, Javelin
-  - **Distance**: 800m, 1500m, 5000m, 10000m, Steeplechase, Marathon
+### 🤖 **AI Coach**
+- **Open-Ended Conversations** - Ask any track & field question naturally
+- **Event-Specific Expertise** - Detailed knowledge for sprints, jumps, throws, distance
+- **Personalized Coaching** - Tailored advice based on your event and level
+- **Quick Prompts** - Easy access to popular coaching topics
 
-### 🎨 Modern Design
-- **Dark Tech Headers**: Professional mobile-inspired interface
-- **Clean Cards**: Modern white cards with subtle shadows
-- **Track-Themed Colors**: Event-specific color coding
-- **Responsive Design**: Optimized for all devices
-- **Smooth Animations**: Professional transitions and hover effects
+### 🏋️‍♂️ **Complete Training System**
+- **Coach Dashboard** - Manage multiple athletes and training plans
+- **Athlete Portal** - View assigned workouts and track progress
+- **Session Builder** - Create track, weights, recovery, and technique sessions
+- **Exercise Tracking** - Sets, reps, weights, distances, and completion status
+- **Progress Monitoring** - Real-time completion tracking and notes
+
+### 📊 **Advanced Analytics**
+- **Performance Charts** - Interactive graphs with trend analysis
+- **Recovery Tracking** - Sleep, HRV, stress, and wellness monitoring
+- **Goal Management** - Set, track, and achieve athletic objectives
+- **Achievement System** - Unlock badges and track milestones
+- **Competition Calendar** - Manage meets and track results
+
+### 📱 **Mobile-First Design**
+- **Native iOS/Android Apps** - Built with Capacitor
+- **Offline Functionality** - Works without internet connection
+- **Push Notifications** - Training reminders and updates
+- **Camera Integration** - Record videos directly in app
+- **Modern UI/UX** - Athletic theme with smooth animations
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 18.2.0 with TypeScript
-- **Build Tool**: Vite 5.0 for fast development and building
-- **Styling**: Tailwind CSS with shadcn/ui components
-- **State Management**: React Context API
-- **Icons**: Lucide React
-- **Backend**: Supabase (configured)
-- **Deployment**: Ready for Vercel, Netlify, or GitHub Pages
+### **Frontend**
+- **React 18** - Modern React with hooks and concurrent features
+- **TypeScript 5+** - Type-safe development with latest features
+- **Vite** - Lightning-fast build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **shadcn/ui** - Beautiful, accessible UI components
+- **React Router** - Client-side routing for SPA experience
 
-## 🚀 Getting Started
+### **Backend & Database**
+- **Supabase** - Complete backend-as-a-service
+- **PostgreSQL** - Robust relational database with RLS
+- **Real-time Subscriptions** - Live data updates
+- **Authentication** - Secure user management
+- **Storage** - Video and file storage with CDN
+
+### **State Management**
+- **React Query** - Server state management and caching
+- **Context API** - Global state for user and app settings
+- **Custom Hooks** - Reusable logic for data fetching
+
+### **Mobile Development**
+- **Capacitor** - Cross-platform native app development
+- **iOS Support** - Native iOS app with App Store deployment
+- **Android Support** - Native Android app with Play Store deployment
+- **Native Plugins** - Camera, notifications, device features
+
+### **Analytics & Visualization**
+- **Recharts** - Interactive charts and data visualization
+- **Date-fns** - Date manipulation and formatting
+- **Custom Analytics** - Performance metrics and insights
+
+### **Development Tools**
+- **ESLint** - Code linting and quality
+- **Prettier** - Code formatting
+- **Git Hooks** - Pre-commit quality checks
+- **GitHub Actions** - CI/CD pipeline
+
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or yarn
+```bash
+# Required
+Node.js 18+
+npm or yarn
+Git
 
-### Installation
+# For mobile development
+Xcode (iOS)
+Android Studio (Android)
+```
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/trackpro-ai.git
-   cd trackpro-ai
-   ```
+### 1. Clone & Install
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/trackpro-ai.git
+cd trackpro-ai
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+# Install dependencies
+npm install
+```
 
-3. **Start the development server**
-   ```bash
-   npm run dev
-   ```
+### 2. Environment Setup
+```bash
+# Copy environment template
+cp .env.example .env
 
-4. **Open your browser**
-   Navigate to `http://localhost:8080`
+# Add your Supabase credentials:
+# VITE_SUPABASE_URL=your_supabase_url
+# VITE_SUPABASE_ANON_KEY=your_supabase_key
+```
+
+### 3. Database Setup
+```bash
+# 1. Create Supabase project at https://supabase.com
+# 2. Run the schema in Supabase SQL Editor:
+#    Copy contents of supabase/schema.sql
+# 3. Create storage bucket: "video-analyses"
+```
+
+### 4. Start Development
+```bash
+# Start dev server
+npm run dev
+
+# Open browser to http://localhost:5173
+```
+
+### 5. Mobile Development (Optional)
+```bash
+# Build web assets
+npm run build
+
+# iOS
+npx cap sync ios
+npx cap open ios
+
+# Android
+npx cap sync android
+npx cap open android
+```
 
 ### Build for Production
 
@@ -82,93 +156,95 @@ npm run build
 npm run preview
 ```
 
-## 📱 Usage
-
-### Getting Started
-1. **Profile Setup**: Create your athlete profile with personal information
-2. **Event Selection**: Choose your primary track & field events
-3. **Goal Setting**: Set SMART goals with specific targets and deadlines
-4. **Training**: Log workouts and track your training load
-5. **Recovery**: Monitor daily wellness metrics
-6. **Analysis**: Use video analysis for technique improvement
-
-### Key Features
-
-#### Video Analysis
-- Upload training videos or competition footage
-- Freeze-frame analysis with interactive marking
-- Biomechanical point tracking
-- AI-powered technique recommendations
-
-#### Training Management
-- Pre-built exercise library with 50+ exercises
-- Custom workout creation
-- RPE (Rate of Perceived Exertion) tracking
-- Training load monitoring
-
-#### Recovery Tracking
-- Daily wellness questionnaire
-- Sleep, stress, energy, and nutrition monitoring
-- Recovery score calculation
-- Personalized recommendations
-
-#### Goal Setting
-- SMART goal framework
-- Milestone tracking
-- Progress visualization
-- Achievement badges
-
-## 🏗️ Project Structure
+## 📁 Project Structure
 
 ```
-src/
-├── components/
-│   ├── screens/           # Main app screens
-│   ├── ui/               # Reusable UI components
-│   ├── VideoAnalysisModal.tsx
-│   ├── Navigation.tsx
-│   └── ...
-├── contexts/             # React Context providers
-│   ├── UserContext.tsx
-│   ├── TrainingContext.tsx
-│   ├── RecoveryContext.tsx
-│   └── GoalsContext.tsx
-├── lib/
-│   ├── events.ts         # Track & field events data
-│   ├── trackTechTheme.ts # Design system
-│   └── utils.ts
-└── pages/
-    └── Index.tsx         # Main app entry
+trackpro-ai/
+├── src/
+│   ├── components/              # UI Components
+│   │   ├── analytics/           # Charts and data visualization
+│   │   ├── screens/             # Main screen components
+│   │   ├── training/            # Training-related components
+│   │   └── ui/                  # shadcn/ui components
+│   ├── contexts/                # React Context providers
+│   │   ├── UserContext.tsx      # User state and authentication
+│   │   └── GoalsContext.tsx     # Goals management
+│   ├── hooks/                   # Custom React hooks
+│   │   ├── useAuth.ts           # Authentication hook
+│   │   ├── useTraining.ts       # Training data hooks
+│   │   └── useAnalytics.ts      # Analytics hooks
+│   ├── lib/                     # Utilities and configurations
+│   │   ├── supabase.ts          # Supabase client
+│   │   ├── athleticTechTheme.ts # Design system
+│   │   └── events.ts            # Track & field events data
+│   ├── pages/                   # Page components (routing)
+│   │   ├── HomePage.tsx         # Main dashboard
+│   │   ├── TrainingPage.tsx     # Training management
+│   │   ├── RecoveryPage.tsx     # Recovery tracking
+│   │   ├── GoalsPage.tsx        # Goal management
+│   │   └── ProfilePage.tsx      # User profile
+│   ├── services/                # API and data services
+│   │   └── api.ts               # Supabase API functions
+│   ├── types/                   # TypeScript definitions
+│   │   ├── database.ts          # Database types
+│   │   └── index.ts             # General types
+│   └── styles/                  # Global styles
+├── supabase/                    # Database schema and config
+│   └── schema.sql               # Complete database schema
+├── ios/                         # iOS native project
+├── android/                     # Android native project
+├── public/                      # Static assets
+├── capacitor.config.ts          # Mobile app configuration
+├── DEPLOYMENT_GUIDE.md          # Complete deployment guide
+└── package.json                 # Dependencies and scripts
 ```
-
-## 🎨 Design System
-
-The app uses a custom **Track Tech Theme** with:
-- **Dark Headers**: Professional mobile-inspired headers
-- **Event Colors**: Color-coded system for different track events
-- **Performance Colors**: Visual indicators for performance levels
-- **Modern Cards**: Clean white cards with subtle shadows
-- **Responsive Grid**: Mobile-first responsive design
-
-## 🔮 Future Enhancements
-
-- [ ] **Mobile App**: React Native version for iOS/Android
-- [ ] **Real-time Coaching**: Live video analysis during training
-- [ ] **Team Management**: Coach dashboard for multiple athletes
-- [ ] **Competition Mode**: Meet management and live results
-- [ ] **Wearable Integration**: Heart rate and GPS data sync
-- [ ] **Social Features**: Athlete community and sharing
-- [ ] **Advanced Analytics**: Machine learning insights
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! Here's how to get started:
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+### Development Workflow
+```bash
+# 1. Fork and clone
+git clone https://github.com/yourusername/trackpro-ai.git
+
+# 2. Create feature branch
+git checkout -b feature/amazing-feature
+
+# 3. Make changes and test
+npm run dev
+npm run lint
+npm run type-check
+
+# 4. Commit with conventional commits
+git commit -m "feat: add amazing feature"
+
+# 5. Push and create PR
+git push origin feature/amazing-feature
+```
+
+### Code Standards
+- **TypeScript** - All new code must be typed
+- **ESLint** - Follow the configured linting rules
+- **Prettier** - Code formatting is enforced
+- **Conventional Commits** - Use semantic commit messages
+
+### Areas for Contribution
+- 🎥 **Video Analysis** - Advanced AI integration
+- 📊 **Analytics** - New chart types and insights
+- 🏃‍♂️ **Events** - Support for additional track & field events
+- 📱 **Mobile** - Native mobile features
+- 🎨 **UI/UX** - Design improvements and animations
+- 🧪 **Testing** - Unit and integration tests
+- 📚 **Documentation** - Guides and API docs
+
+### Bug Reports
+Use GitHub Issues with:
+- Clear description
+- Steps to reproduce
+- Expected vs actual behavior
+- Screenshots/videos if applicable
+- Environment details
 
 ## 📄 License
 
@@ -176,10 +252,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Track & field community for inspiration and feedback
-- shadcn/ui for beautiful UI components
-- Lucide for comprehensive icon set
-- Tailwind CSS for utility-first styling
+- **Supabase** - Backend infrastructure and real-time features
+- **shadcn/ui** - Beautiful and accessible UI components
+- **Capacitor** - Cross-platform mobile development
+- **Recharts** - Data visualization and analytics
+- **Track & Field Community** - Domain expertise and feedback
 
 ## 📞 Support
 

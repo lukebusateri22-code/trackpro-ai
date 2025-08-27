@@ -20,6 +20,7 @@ export const athleticTechTheme = {
       distance: '#06D6A0', // Endurance green
       hurdles: '#EC4899', // Dynamic pink
       relays: '#4ECDC4', // Team teal
+      weights: '#FF6B35', // Weight training orange
     },
     
     // Status & Performance
@@ -29,6 +30,7 @@ export const athleticTechTheme = {
       average: '#F59E0B', // Amber average
       poor: '#EF4444', // Red needs work
       recovery: '#8B5CF6', // Purple recovery
+      completed: '#10B981', // Completed green
     },
     
     // UI Foundation
@@ -36,6 +38,7 @@ export const athleticTechTheme = {
       primary: '#FFFFFF',
       secondary: '#F8FAFC',
       elevated: '#FFFFFF',
+      accent: '#F1F5F9',
       glass: 'rgba(255, 255, 255, 0.1)',
       darkGlass: 'rgba(15, 23, 42, 0.8)',
     },
@@ -55,11 +58,19 @@ export const athleticTechTheme = {
       focus: '#FF6B35',
       border: '#E2E8F0',
       divider: '#F1F5F9',
-    }
+    },
+    
+    // Role-based Colors
+    roles: {
+      coach: '#FF6B35', // Orange for coaches
+      athlete: '#4ECDC4', // Teal for athletes
+    },
   },
   
   // Performance Gradients - High Energy
   gradients: {
+    primary: 'linear-gradient(135deg, #FF6B35 0%, #8B5CF6 100%)',
+    performance: 'linear-gradient(135deg, #10B981 0%, #4ECDC4 100%)',
     speed: 'linear-gradient(135deg, #FF3366 0%, #FF6B35 100%)',
     power: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)',
     endurance: 'linear-gradient(135deg, #06D6A0 0%, #4ECDC4 100%)',
@@ -123,6 +134,8 @@ export const athleticTechTheme = {
     md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
     xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+    card: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    elevated: '0 8px 24px rgba(0, 0, 0, 0.2)',
     glow: '0 0 20px rgba(255, 107, 53, 0.3)',
     glowPurple: '0 0 20px rgba(139, 92, 246, 0.3)',
   },

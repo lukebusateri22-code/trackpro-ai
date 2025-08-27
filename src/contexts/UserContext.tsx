@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { User, UserRole } from '@/types/coach-athlete';
 
 export interface UserProfile {
   id: string;
@@ -9,6 +10,7 @@ export interface UserProfile {
   personalRecords: { [event: string]: { value: number; date: string; location?: string } };
   joinDate: string;
   avatar?: string;
+  role: UserRole;
 }
 
 interface UserContextType {
@@ -17,6 +19,10 @@ interface UserContextType {
   updateExperienceLevel: (event: string, level: 'Beginner' | 'Intermediate' | 'Advanced' | 'Pro') => void;
   updatePersonalRecord: (event: string, value: number, date: string, location?: string) => void;
   isProfileComplete: boolean;
+  isAuthenticated: boolean;
+  isCoach: boolean;
+  isAthlete: boolean;
+  switchRole: (role: UserRole) => void;
 }
 
 const defaultUser: UserProfile = {
@@ -34,7 +40,8 @@ const defaultUser: UserProfile = {
     '100m': { value: 11.2, date: '2024-08-15', location: 'City Stadium' },
     'Long Jump': { value: 6.85, date: '2024-07-20', location: 'Regional Meet' }
   },
-  joinDate: '2024-01-15'
+  joinDate: '2024-01-15',
+  role: 'athlete'
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -102,13 +109,30 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user.age > 0 && 
     user.primaryEvents.length > 0 : false;
 
+  const isAuthenticated = user !== null;
+  const isCoach = user?.role === 'coach';
+  const isAthlete = user?.role === 'athlete';
+
+  const switchRole = (role: UserRole) => {
+    if (user) {
+      setUser({
+        ...user,
+        role
+      });
+    }
+  };
+
   return (
     <UserContext.Provider value={{
       user,
       updateUser,
       updateExperienceLevel,
       updatePersonalRecord,
-      isProfileComplete
+      isProfileComplete,
+      isAuthenticated,
+      isCoach,
+      isAthlete,
+      switchRole
     }}>
       {children}
     </UserContext.Provider>

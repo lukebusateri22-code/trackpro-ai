@@ -31,6 +31,15 @@ const AICoachChat: React.FC<AICoachChatProps> = ({ isOpen, onClose }) => {
       type: 'text'
     }
   ]);
+  
+  const quickPrompts = [
+    '🏃‍♂️ Create a sprint training plan',
+    '🥗 Nutrition advice for athletes',
+    '🏥 Injury prevention tips',
+    '🧠 Mental preparation strategies',
+    '😴 Recovery optimization',
+    '🏆 Competition strategy'
+  ];
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -69,6 +78,50 @@ const AICoachChat: React.FC<AICoachChatProps> = ({ isOpen, onClose }) => {
 
   const generateAIResponse = (userInput: string): Message => {
     const input = userInput.toLowerCase();
+    
+    // Sprint Training Plans
+    if (input.includes('sprint training') || input.includes('100m') || input.includes('200m')) {
+      return {
+        id: Date.now().toString(),
+        content: `🏃‍♂️ **Sprint Training Plan Analysis**\n\nBased on your request, here's a comprehensive sprint training approach:\n\n**Phase 1: Acceleration Development (Weeks 1-4)**\n• Block starts: 6x30m @ 95%\n• Acceleration runs: 4x50m @ 90%\n• Strength: Squats, Power cleans\n• Recovery: 48-72 hours between sessions\n\n**Phase 2: Speed Development (Weeks 5-8)**\n• Flying 30m: 5x30m @ 100%\n• Speed endurance: 3x150m @ 95%\n• Plyometrics: Bounds, hops\n\n**Key Metrics to Track:**\n• 30m split times\n• Reaction time from blocks\n• Stride frequency and length\n\n**Nutrition Focus:**\n• Creatine supplementation\n• High protein intake (2g/kg bodyweight)\n• Proper hydration\n\nWould you like me to create a specific weekly schedule or focus on any particular aspect?`,
+        sender: 'ai',
+        timestamp: new Date(),
+        type: 'text'
+      };
+    }
+    
+    // Training plan creation
+    if (input.includes('create training plan') || input.includes('workout plan')) {
+      return {
+        id: Date.now().toString(),
+        content: `📋 **Custom Training Plan Generator**\n\nI can help you create a personalized training plan! Let me know:\n\n**1. Your Event(s):**\n• Sprints (100m, 200m, 400m)\n• Distance (800m, 1500m, 5000m)\n• Jumps (Long, High, Triple, Pole)\n• Throws (Shot, Discus, Hammer, Javelin)\n\n**2. Your Experience Level:**\n• Beginner (0-2 years)\n• Intermediate (2-5 years)\n• Advanced (5+ years)\n• Elite/Professional\n\n**3. Training Phase:**\n• Base Building\n• Strength Development\n• Speed/Power Phase\n• Competition Prep\n• Recovery/Transition\n\n**4. Available Training Days:**\n• 3-4 days/week (Recreational)\n• 5-6 days/week (Competitive)\n• 7+ days/week (Elite)\n\nJust tell me your event and level, and I'll create a detailed plan!`,
+        sender: 'ai',
+        timestamp: new Date(),
+        type: 'text'
+      };
+    }
+    
+    // Injury prevention
+    if (input.includes('injury') || input.includes('pain') || input.includes('prevention')) {
+      return {
+        id: Date.now().toString(),
+        content: `🏥 **Injury Prevention & Recovery**\n\n**Common Track & Field Injuries:**\n\n**Sprinters:**\n• Hamstring strains - Dynamic warm-up, eccentric strengthening\n• Achilles tendinitis - Calf stretching, gradual load increase\n• Hip flexor strains - Hip mobility work\n\n**Distance Runners:**\n• Shin splints - Proper footwear, surface variation\n• IT band syndrome - Hip strengthening, foam rolling\n• Plantar fasciitis - Calf stretching, arch support\n\n**Jumpers:**\n• Patellar tendinitis - Eccentric quad exercises\n• Ankle sprains - Balance training, proprioception\n• Lower back pain - Core strengthening\n\n**Throwers:**\n• Shoulder impingement - Rotator cuff strengthening\n• Elbow pain - Proper technique, gradual loading\n• Wrist injuries - Flexibility, proper grip\n\n**Prevention Protocol:**\n✅ Dynamic warm-up (10-15 min)\n✅ Cool-down and stretching (15 min)\n✅ Strength training 2-3x/week\n✅ Proper nutrition and hydration\n✅ Adequate sleep (7-9 hours)\n✅ Listen to your body\n\nAre you experiencing any specific issues I can help with?`,
+        sender: 'ai',
+        timestamp: new Date(),
+        type: 'text'
+      };
+    }
+    
+    // Nutrition advice
+    if (input.includes('nutrition') || input.includes('diet') || input.includes('food')) {
+      return {
+        id: Date.now().toString(),
+        content: `🥗 **Athletic Nutrition Guide**\n\n**Pre-Training (1-2 hours before):**\n• Complex carbs: Oatmeal, banana, whole grain toast\n• Light protein: Greek yogurt, nuts\n• Hydration: 16-20oz water\n\n**During Training (>90 minutes):**\n• Sports drink with electrolytes\n• Quick carbs if needed: Dates, energy gels\n\n**Post-Training (within 30 minutes):**\n• Protein: 20-30g (whey shake, chocolate milk)\n• Carbs: 30-60g (fruit, rice, pasta)\n• Hydration: Replace 150% of fluid lost\n\n**Daily Nutrition Targets:**\n\n**Sprinters/Power Athletes:**\n• Protein: 1.6-2.2g/kg bodyweight\n• Carbs: 5-7g/kg bodyweight\n• Fats: 1-1.5g/kg bodyweight\n• Creatine: 3-5g daily\n\n**Endurance Athletes:**\n• Protein: 1.2-1.6g/kg bodyweight\n• Carbs: 7-12g/kg bodyweight\n• Fats: 1-1.5g/kg bodyweight\n• Iron: Monitor levels regularly\n\n**Hydration:**\n• 35-40ml per kg bodyweight daily\n• Monitor urine color (pale yellow)\n• Increase in hot weather/altitude\n\n**Supplements to Consider:**\n• Vitamin D (if deficient)\n• B12 (especially vegetarians)\n• Omega-3 fatty acids\n• Magnesium for muscle function\n\nWhat's your specific nutrition goal?`,
+        sender: 'ai',
+        timestamp: new Date(),
+        type: 'text'
+      };
+    }
     
     // High Jump Analysis (like in screenshots)
     if (input.includes('high jump') || input.includes('jump technique')) {
@@ -114,10 +167,59 @@ const AICoachChat: React.FC<AICoachChatProps> = ({ isOpen, onClose }) => {
       };
     }
     
-    // General response
+    // Mental training and psychology
+    if (input.includes('mental') || input.includes('psychology') || input.includes('confidence') || input.includes('nerves')) {
+      return {
+        id: Date.now().toString(),
+        content: `🧠 **Mental Performance Training**\n\n**Pre-Competition Routine:**\n\n**24 Hours Before:**\n• Visualization: 10-15 minutes of perfect performance\n• Positive self-talk: "I am prepared and ready"\n• Light physical activity to stay loose\n• Avoid overthinking technique\n\n**Competition Day:**\n• Consistent warm-up routine\n• Focus on process, not outcome\n• Use breathing techniques (4-7-8 method)\n• Trust your training\n\n**Managing Competition Nerves:**\n\n**Reframe Anxiety:**\n• Nerves = Excitement and readiness\n• "I'm nervous because this matters to me"\n• Channel energy into focus\n\n**Visualization Techniques:**\n• See yourself executing perfect technique\n• Feel the movements in your body\n• Hear the sounds of success\n• Include potential challenges and how you overcome them\n\n**Focus Cues:**\n\n**Sprinters:** "Drive, drive, relax"\n**Jumpers:** "Fast, tall, attack"\n**Throwers:** "Smooth, explosive, follow through"\n**Distance:** "Rhythm, relax, strong"\n\n**Between Attempts/Races:**\n• Stay warm and loose\n• Use positive imagery\n• Focus on one technical cue\n• Avoid comparing to others\n\n**Building Confidence:**\n• Keep a training log of successes\n• Set process goals, not just outcome goals\n• Celebrate small improvements\n• Learn from setbacks without dwelling\n\nWhat specific mental challenge are you facing?`,
+        sender: 'ai',
+        timestamp: new Date(),
+        type: 'text'
+      };
+    }
+    
+    // Recovery and rest
+    if (input.includes('recovery') || input.includes('rest') || input.includes('sleep') || input.includes('massage')) {
+      return {
+        id: Date.now().toString(),
+        content: `😴 **Recovery & Regeneration Protocol**\n\n**Sleep Optimization (Most Important!):**\n• 7-9 hours nightly for athletes\n• Consistent sleep/wake times\n• Cool, dark room (65-68°F)\n• No screens 1 hour before bed\n• Magnesium supplement if needed\n\n**Active Recovery Methods:**\n\n**Daily (10-15 minutes):**\n• Light stretching or yoga\n• Foam rolling major muscle groups\n• Walking or easy swimming\n• Deep breathing exercises\n\n**Weekly (30-60 minutes):**\n• Massage therapy\n• Sauna or hot/cold therapy\n• Extended mobility work\n• Meditation or mindfulness\n\n**Nutrition for Recovery:**\n• Post-workout: Protein + carbs within 30 min\n• Anti-inflammatory foods: Berries, leafy greens, fish\n• Tart cherry juice for sleep quality\n• Adequate hydration throughout day\n\n**Recovery Indicators to Monitor:**\n\n**Good Recovery:**\n✅ Rested upon waking\n✅ Consistent energy levels\n✅ Good appetite\n✅ Positive mood\n✅ Heart rate variability stable\n\n**Poor Recovery:**\n❌ Fatigue despite adequate sleep\n❌ Elevated resting heart rate\n❌ Decreased motivation\n❌ Increased injury susceptibility\n❌ Performance plateau/decline\n\n**Recovery Tools:**\n• Compression garments\n• Ice baths (10-15 min at 50-59°F)\n• Contrast showers (hot/cold)\n• Percussion massage devices\n• Meditation apps (Headspace, Calm)\n\n**Weekly Recovery Schedule:**\n• Hard training days: 2-3 per week max\n• Easy days: Active recovery between hard sessions\n• Complete rest: 1 day per week minimum\n\nHow is your current recovery feeling?`,
+        sender: 'ai',
+        timestamp: new Date(),
+        type: 'text'
+      };
+    }
+    
+    // Competition strategy
+    if (input.includes('competition') || input.includes('meet') || input.includes('race strategy')) {
+      return {
+        id: Date.now().toString(),
+        content: `🏆 **Competition Strategy Guide**\n\n**Pre-Competition Planning:**\n\n**Know the Competition:**\n• Study the venue and conditions\n• Research your competitors\n• Plan your warm-up timing\n• Have backup plans for weather/delays\n\n**Event-Specific Strategies:**\n\n**Sprints (100m-400m):**\n• Focus on your lane, ignore others\n• Execute your race plan (don't get pulled out too fast)\n• Relax through the drive phase\n• Finish through the line\n\n**Distance (800m+):**\n• Position yourself strategically\n• Know your split times\n• Stay patient early, strong late\n• Have multiple kick gears ready\n\n**Jumps:**\n• Start conservatively, build confidence\n• Use early jumps to dial in technique\n• Save biggest efforts for when needed\n• Stay aggressive on final attempts\n\n**Throws:**\n• Establish rhythm early\n• Focus on technique over distance initially\n• Build intensity through rounds\n• Stay loose between attempts\n\n**Competition Day Timeline:**\n\n**3-4 Hours Before:**\n• Light meal, hydration\n• Arrive at venue, check in\n• Mental preparation, visualization\n\n**2 Hours Before:**\n• Begin dynamic warm-up\n• Technical drills specific to event\n• Light practice attempts\n\n**30 Minutes Before:**\n• Final preparations\n• Focus on key technical cues\n• Positive self-talk\n• Trust your preparation\n\n**During Competition:**\n• Stay present, one attempt at a time\n• Use breathing to stay calm\n• Celebrate good efforts\n• Learn from each attempt\n\n**Post-Competition:**\n• Cool down properly\n• Reflect on what went well\n• Note areas for improvement\n• Plan recovery before next training\n\nWhat type of competition are you preparing for?`,
+        sender: 'ai',
+        timestamp: new Date(),
+        type: 'text'
+      };
+    }
+    
+    // Open-ended track and field response
+    const generateOpenResponse = (question: string): string => {
+      const q = question.toLowerCase();
+      
+      // Check if it's track and field related
+      const trackTerms = ['track', 'field', 'run', 'sprint', 'distance', 'jump', 'throw', 'race', 'training', 'technique', 'form', 'speed', 'endurance', 'power', 'strength', 'coach', 'athlete', 'meet', 'competition', 'pr', 'personal best', 'improve', 'faster', 'better', 'time', 'meter', 'm ', 'km', 'mile', 'hurdle', 'relay', 'block', 'start', 'finish'];
+      const eventTerms = ['100m', '200m', '400m', '800m', '1500m', '5000m', '10000m', '5k', '10k', 'mile', 'marathon', 'high jump', 'long jump', 'triple jump', 'pole vault', 'shot put', 'discus', 'hammer', 'javelin', 'hurdles', 'steeplechase'];
+      
+      const isTrackRelated = trackTerms.some(term => q.includes(term)) || eventTerms.some(term => q.includes(term));
+      
+      if (isTrackRelated) {
+        return `Great question about "${question}"! 🏃‍♂️\n\nAs your Track & Field AI Coach, I can provide detailed insights on this topic. Here's what I can help you with:\n\n**For Your Specific Question:**\nI can analyze technique, provide training advice, discuss strategy, or explain the science behind performance in any track and field event.\n\n**All Events Covered:**\n• **Sprints:** 100m, 200m, 400m, hurdles, relays\n• **Middle Distance:** 800m, 1500m, mile\n• **Distance:** 3000m, 5000m, 10000m, marathon\n• **Jumps:** High, long, triple, pole vault\n• **Throws:** Shot put, discus, hammer, javelin\n\n**Topics I Can Discuss:**\n• Training plans and periodization\n• Technique analysis and improvement\n• Race strategy and tactics\n• Performance standards and benchmarks\n• Injury prevention and recovery\n• Nutrition and hydration\n• Mental preparation\n• Equipment and gear\n\n**To Give You the Best Answer:**\nCould you provide a bit more context? For example:\n• What event are you asking about?\n• What's your current level/experience?\n• Are you looking for technique, training, or strategy advice?\n\nThe more specific you are, the more detailed and helpful my response can be!`;
+      } else {
+        return `I understand you're asking about "${question}". I'm specialized as a Track & Field AI Coach, so I'm most helpful with athletics-related questions!\n\n🏃‍♂️ **I can help you with any track and field topic:**\n• Event-specific training and technique\n• Performance improvement strategies\n• Race tactics and competition prep\n• Injury prevention and recovery\n• Nutrition for athletic performance\n• Mental training and sports psychology\n\n**Try asking me about:**\n• "How to improve my 100m start?"\n• "What's a good 800m training plan?"\n• "High jump technique tips"\n• "How to prevent shin splints?"\n• "Race strategy for 1500m"\n• "Nutrition for distance runners"\n\nWhat track and field question can I help you with?`;
+      }
+    };
+    
     return {
-      id: (Date.now() + 1).toString(),
-      content: `I'd love to help you with that! I can provide detailed analysis for:\n\n🏃‍♂️ **Event-Specific Analysis:**\n• Sprints (100m, 200m, 400m)\n• Jumps (Long, High, Triple, Pole Vault)\n• Throws (Shot, Discus, Hammer, Javelin)\n• Distance (800m, 1500m, 5K, 10K)\n\n📊 **Performance Services:**\n• Technical breakdowns with scores\n• Elite athlete comparisons\n• Personalized training plans\n• Injury prevention protocols\n\n**Try asking:** "Analyze my high jump technique" or "Create a sprint training plan"\n\nWhat specific event or aspect would you like to focus on?`,
+      id: Date.now().toString(),
+      content: generateOpenResponse(userInput),
       sender: 'ai',
       timestamp: new Date(),
       type: 'text'
@@ -342,6 +444,35 @@ const AICoachChat: React.FC<AICoachChatProps> = ({ isOpen, onClose }) => {
         </CardContent>
         
         <div className="p-4 border-t" style={{ borderColor: athleticTechTheme.colors.interactive.border }}>
+          {/* Quick Prompts */}
+          {messages.length <= 1 && (
+            <div className="mb-4">
+              <p 
+                className="text-sm font-medium mb-3"
+                style={{ color: athleticTechTheme.colors.text.primary }}
+              >
+                Quick Start:
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {quickPrompts.map((prompt, index) => (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setInputMessage(prompt.replace(/^[^\s]+\s/, ''))}
+                    className="text-left justify-start h-auto py-2 px-3"
+                    style={{
+                      borderColor: athleticTechTheme.colors.interactive.border,
+                      color: athleticTechTheme.colors.text.primary
+                    }}
+                  >
+                    <span className="text-xs">{prompt}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+          
           <div className="flex space-x-3">
             <Input
               value={inputMessage}
@@ -352,7 +483,11 @@ const AICoachChat: React.FC<AICoachChatProps> = ({ isOpen, onClose }) => {
             />
             <Button 
               onClick={handleSendMessage}
-              style={{ background: athleticTechTheme.gradients.speed }}
+              disabled={!inputMessage.trim()}
+              style={{ 
+                background: inputMessage.trim() ? athleticTechTheme.gradients.speed : athleticTechTheme.colors.surface.elevated,
+                opacity: inputMessage.trim() ? 1 : 0.5
+              }}
               className="text-white"
             >
               <Send className="h-4 w-4" />

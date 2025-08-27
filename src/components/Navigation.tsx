@@ -1,20 +1,26 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Target, Activity, User, Heart, Flame, Zap, Trophy } from 'lucide-react';
 import athleticTechTheme from '@/lib/athleticTechTheme';
 
 interface NavigationProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeTab?: string;
 }
 
-const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
+const Navigation: React.FC<NavigationProps> = ({ activeTab }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const tabs = [
-    { id: 'home', label: 'Home', icon: Home, color: athleticTechTheme.colors.primary.track },
-    { id: 'training', label: 'Training', icon: Zap, color: athleticTechTheme.colors.events.sprints },
-    { id: 'recovery', label: 'Recovery', icon: Heart, color: athleticTechTheme.colors.performance.recovery },
-    { id: 'goals', label: 'Goals', icon: Target, color: athleticTechTheme.colors.events.jumps },
-    { id: 'profile', label: 'Profile', icon: User, color: athleticTechTheme.colors.primary.tech },
+    { id: 'home', label: 'Home', icon: Home, color: athleticTechTheme.colors.primary.track, path: '/' },
+    { id: 'training', label: 'Training', icon: Zap, color: athleticTechTheme.colors.events.sprints, path: '/training' },
+    { id: 'recovery', label: 'Recovery', icon: Heart, color: athleticTechTheme.colors.performance.recovery, path: '/recovery' },
+    { id: 'goals', label: 'Goals', icon: Target, color: athleticTechTheme.colors.events.jumps, path: '/goals' },
+    { id: 'profile', label: 'Profile', icon: User, color: athleticTechTheme.colors.primary.tech, path: '/profile' },
   ];
+  
+  // Auto-detect active tab from current route if not provided
+  const currentActiveTab = activeTab || tabs.find(tab => tab.path === location.pathname)?.id || 'home';
 
   return (
     <div 
@@ -31,12 +37,12 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
         <div className="flex pb-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
+            const isActive = currentActiveTab === tab.id;
             
             return (
               <button
                 key={tab.id}
-                onClick={() => onTabChange(tab.id)}
+                onClick={() => navigate(tab.path)}
                 className="flex-1 flex flex-col items-center py-3 px-2 transition-all duration-200"
               >
                 <div 

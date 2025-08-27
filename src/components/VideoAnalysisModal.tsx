@@ -516,7 +516,24 @@ const VideoAnalysisModal: React.FC<VideoAnalysisModalProps> = ({ isOpen, onClose
                         
                         {/* Video Controls */}
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            {/* Frame-by-frame controls */}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                if (videoRef.current) {
+                                  const step = 1/30; // 1 frame at 30fps
+                                  videoRef.current.currentTime = Math.max(videoRef.current.currentTime - step, 0);
+                                  setCurrentTime(videoRef.current.currentTime);
+                                }
+                              }}
+                              className="text-white hover:bg-white/20"
+                              title="Previous frame"
+                            >
+                              <SkipBack className="h-3 w-3" />
+                            </Button>
+                            
                             <Button
                               size="sm"
                               variant="ghost"
@@ -524,6 +541,42 @@ const VideoAnalysisModal: React.FC<VideoAnalysisModalProps> = ({ isOpen, onClose
                               className="text-white hover:bg-white/20"
                             >
                               {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                            </Button>
+                            
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                if (videoRef.current) {
+                                  const step = 1/30; // 1 frame at 30fps
+                                  videoRef.current.currentTime = Math.min(videoRef.current.currentTime + step, duration);
+                                  setCurrentTime(videoRef.current.currentTime);
+                                }
+                              }}
+                              className="text-white hover:bg-white/20"
+                              title="Next frame"
+                            >
+                              <SkipForward className="h-3 w-3" />
+                            </Button>
+                            
+                            {/* Freeze frame capture button */}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                if (videoRef.current) {
+                                  const time = videoRef.current.currentTime;
+                                  // Add freeze frame marker (you can expand this with full freeze frame analysis)
+                                  console.log(`Freeze frame captured at ${time.toFixed(2)}s`);
+                                  setIsPlaying(false);
+                                  videoRef.current.pause();
+                                }
+                              }}
+                              className="text-white hover:bg-white/20 ml-2"
+                              title="Capture freeze frame"
+                              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                            >
+                              <Camera className="h-3 w-3" />
                             </Button>
                             
                             <div className="flex-1 flex items-center gap-2">
@@ -730,6 +783,95 @@ const VideoAnalysisModal: React.FC<VideoAnalysisModalProps> = ({ isOpen, onClose
                     <p style={{ color: athleticTechTheme.colors.text.secondary }}>
                       Strong performance with clear areas for improvement
                     </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Main Weakness - Prominent Section */}
+              <Card 
+                className="border-0 shadow-xl"
+                style={{ 
+                  backgroundColor: athleticTechTheme.colors.surface.secondary,
+                  border: `2px solid ${athleticTechTheme.colors.performance.poor}`,
+                  boxShadow: `0 0 20px ${athleticTechTheme.colors.performance.poor}20`
+                }}
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3" style={{ color: athleticTechTheme.colors.performance.poor }}>
+                    <div 
+                      className="w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: `${athleticTechTheme.colors.performance.poor}20` }}
+                    >
+                      <Target className="h-5 w-5" style={{ color: athleticTechTheme.colors.performance.poor }} />
+                    </div>
+                    🎯 Your Main Weakness
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div 
+                    className="p-6 rounded-xl"
+                    style={{ backgroundColor: `${athleticTechTheme.colors.performance.poor}10` }}
+                  >
+                    <h3 
+                      className="text-xl font-bold mb-3"
+                      style={{ color: athleticTechTheme.colors.performance.poor }}
+                    >
+                      {analysisResult.event === 'High Jump' && 'Limited Arching Technique'}
+                      {analysisResult.event === '100m' && 'Inconsistent Block Start'}
+                      {analysisResult.event === '200m' && 'Speed Endurance Drop-off'}
+                      {analysisResult.event === 'Long Jump' && 'Takeoff Timing Issues'}
+                      {analysisResult.event === 'Triple Jump' && 'Step Phase Imbalance'}
+                      {analysisResult.event === 'Pole Vault' && 'Plant Angle Inconsistency'}
+                      {analysisResult.event === 'Shot Put' && 'Power Transfer Inefficiency'}
+                      {analysisResult.event === 'Discus' && 'Release Point Variability'}
+                      {analysisResult.event === 'Javelin' && 'Crossover Step Rhythm'}
+                      {analysisResult.event === 'Hammer' && 'Turn Balance Issues'}
+                      {!['High Jump', '100m', '200m', 'Long Jump', 'Triple Jump', 'Pole Vault', 'Shot Put', 'Discus', 'Javelin', 'Hammer'].includes(analysisResult.event) && 'Technique Consistency'}
+                    </h3>
+                    <p 
+                      className="text-base mb-4 leading-relaxed"
+                      style={{ color: athleticTechTheme.colors.text.primary }}
+                    >
+                      {analysisResult.event === 'High Jump' && 'Your arching technique over the bar needs significant improvement. You\'re not achieving optimal back extension, which is limiting your clearance height. This is costing you approximately 10-15cm in potential height.'}
+                      {analysisResult.event === '100m' && 'Your block start shows inconsistent timing and drive angle. The delayed reaction and suboptimal drive phase are costing you 0.1-0.2 seconds in your first 30 meters, which compounds throughout the race.'}
+                      {analysisResult.event === '200m' && 'You\'re losing significant speed in the final 50 meters due to poor speed endurance. Your technique breaks down under fatigue, particularly your arm action and stride length.'}
+                      {analysisResult.event === 'Long Jump' && 'Your takeoff timing is inconsistent, causing you to either foul or take off too early. This timing issue is preventing you from converting your approach speed into optimal distance.'}
+                      {analysisResult.event === 'Triple Jump' && 'Your step phase shows significant imbalance and shortened distance. You\'re not maintaining forward momentum effectively, which disrupts your rhythm for the final jump phase.'}
+                      {analysisResult.event === 'Pole Vault' && 'Your plant angle varies significantly between attempts, affecting your energy transfer into the pole. Inconsistent plant timing is limiting your height potential.'}
+                      {analysisResult.event === 'Shot Put' && 'Your power transfer from legs to upper body is inefficient. You\'re losing significant force during the transition, which could add 1-2 meters to your distance with proper technique.'}
+                      {analysisResult.event === 'Discus' && 'Your release point varies too much between throws, affecting both distance and consistency. The timing of your final acceleration needs refinement.'}
+                      {analysisResult.event === 'Javelin' && 'Your crossover steps lack consistent rhythm, affecting your approach speed and final throwing position. This impacts both distance and accuracy.'}
+                      {analysisResult.event === 'Hammer' && 'You\'re struggling with balance during your turns, causing speed loss and affecting your release angle. Better balance would significantly improve your distance.'}
+                      {!['High Jump', '100m', '200m', 'Long Jump', 'Triple Jump', 'Pole Vault', 'Shot Put', 'Discus', 'Javelin', 'Hammer'].includes(analysisResult.event) && 'Your technique shows inconsistencies that are limiting your performance potential. Focus on developing more consistent movement patterns.'}
+                    </p>
+                    <div 
+                      className="p-4 rounded-lg"
+                      style={{ backgroundColor: athleticTechTheme.colors.surface.elevated }}
+                    >
+                      <h4 
+                        className="font-semibold mb-2 flex items-center gap-2"
+                        style={{ color: athleticTechTheme.colors.primary.track }}
+                      >
+                        <Zap className="h-4 w-4" />
+                        Priority Fix:
+                      </h4>
+                      <p 
+                        className="text-sm"
+                        style={{ color: athleticTechTheme.colors.text.secondary }}
+                      >
+                        {analysisResult.event === 'High Jump' && 'Practice the "back-over-bar" drill daily. Set up a low bar and focus solely on arching motion. Work on hip flexor and thoracic spine flexibility.'}
+                        {analysisResult.event === '100m' && 'Practice block starts with a metronome. Focus on explosive drive angle and consistent timing. Do 10-15 starts per session with video feedback.'}
+                        {analysisResult.event === '200m' && 'Add speed endurance work: 3x150m at 95% with full recovery. Focus on maintaining form when fatigued.'}
+                        {analysisResult.event === 'Long Jump' && 'Practice approach runs with consistent checkmarks. Use a takeoff board for timing drills without jumping.'}
+                        {analysisResult.event === 'Triple Jump' && 'Focus on step phase drills. Practice hop-step combinations at 70% speed to develop rhythm and balance.'}
+                        {analysisResult.event === 'Pole Vault' && 'Practice plant drills without the pole first, then with shorter poles. Focus on consistent hand position and timing.'}
+                        {analysisResult.event === 'Shot Put' && 'Practice power position drills. Focus on leg drive timing and hip-to-shoulder connection.'}
+                        {analysisResult.event === 'Discus' && 'Practice release drills with lighter implements. Focus on consistent arm path and timing.'}
+                        {analysisResult.event === 'Javelin' && 'Practice crossover steps without the javelin. Focus on rhythm and building speed through the approach.'}
+                        {analysisResult.event === 'Hammer' && 'Practice turns without the hammer first. Focus on balance and foot positioning.'}
+                        {!['High Jump', '100m', '200m', 'Long Jump', 'Triple Jump', 'Pole Vault', 'Shot Put', 'Discus', 'Javelin', 'Hammer'].includes(analysisResult.event) && 'Focus on repetitive technique drills at slower speeds to build consistent movement patterns.'}
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
