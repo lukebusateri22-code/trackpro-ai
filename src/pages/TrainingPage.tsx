@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import Header from '@/components/Header';
 import Navigation from '@/components/Navigation';
 import PageLayout from '@/components/layout/PageLayout';
@@ -7,6 +8,8 @@ import WorkoutCreator from '@/components/workout/WorkoutCreator';
 import WorkoutCompletionModal from '@/components/training/WorkoutCompletionModal';
 import WorkoutLibrary from '@/components/training/WorkoutLibrary';
 import WorkoutCalendar from '@/components/training/WorkoutCalendar';
+import WorkoutAssignmentModal from '@/components/training/WorkoutAssignmentModal';
+import AthleteProgressModal from '@/components/training/AthleteProgressModal';
 import { WORKOUT_TEMPLATES } from '@/lib/workoutLibrary';
 import { useUser } from '@/contexts/UserContext';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -37,6 +40,8 @@ const TrainingPage: React.FC = () => {
   const [showWorkoutCompletion, setShowWorkoutCompletion] = useState(false);
   const [showWorkoutLibrary, setShowWorkoutLibrary] = useState(false);
   const [showWorkoutCalendar, setShowWorkoutCalendar] = useState(false);
+  const [showWorkoutAssignment, setShowWorkoutAssignment] = useState(false);
+  const [showAthleteProgress, setShowAthleteProgress] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
   const [activeView, setActiveView] = useState('dashboard');
   
@@ -134,7 +139,7 @@ const TrainingPage: React.FC = () => {
             icon: Users,
             color: athleticTechTheme.colors.primary.power,
             gradient: athleticTechTheme.gradients.power,
-            onClick: () => alert('Athlete assignment feature coming soon!')
+            onClick: () => setShowWorkoutAssignment(true)
           },
           {
             title: 'Athlete Progress',
@@ -142,7 +147,7 @@ const TrainingPage: React.FC = () => {
             icon: BarChart3,
             color: athleticTechTheme.colors.primary.field,
             gradient: athleticTechTheme.gradients.endurance,
-            onClick: () => alert('Athlete progress monitoring coming soon!')
+            onClick: () => setShowAthleteProgress(true)
           },
           {
             title: 'Training Library',
@@ -471,6 +476,31 @@ const TrainingPage: React.FC = () => {
             alert(`Selected: ${workout.title} on ${new Date(workout.date).toLocaleDateString()}`);
           }}
           onClose={() => setShowWorkoutCalendar(false)}
+        />
+      )}
+      
+      {showWorkoutAssignment && (
+        <WorkoutAssignmentModal
+          workout={{
+            id: 'sample_workout',
+            name: 'Sample Workout',
+            description: 'A sample workout for assignment',
+            exercises: [],
+            estimatedDuration: 60,
+            difficulty: 'moderate'
+          }}
+          onAssign={(assignmentData) => {
+            console.log('Workout assigned:', assignmentData);
+            setShowWorkoutAssignment(false);
+            alert(`Workout assigned to ${assignmentData.targetAthletes.length} athlete(s)!`);
+          }}
+          onClose={() => setShowWorkoutAssignment(false)}
+        />
+      )}
+      
+      {showAthleteProgress && (
+        <AthleteProgressModal
+          onClose={() => setShowAthleteProgress(false)}
         />
       )}
     </div>
