@@ -51,7 +51,7 @@ const Header: React.FC<HeaderProps> = ({
           <h1 className="text-xl font-bold">{title}</h1>
           {(user || authUser) && (
             <p className="text-sm opacity-80 capitalize">
-              {isCoach ? '🏃‍♂️ Coach Mode' : '🎯 Athlete Mode'} • {authUser?.email?.split('@')[0] || profile?.username || user?.username || 'User'}
+              {profile?.role === 'coach' ? '🏃‍♂️ Coach Mode' : '🎯 Athlete Mode'} • {authUser?.email?.split('@')[0] || profile?.username || user?.username || 'User'}
             </p>
           )}
         </div>
