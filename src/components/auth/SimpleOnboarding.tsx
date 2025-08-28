@@ -16,6 +16,7 @@ interface OnboardingData {
   email: string;
   password: string;
   role: 'athlete' | 'coach';
+  coachCode?: string;
   age?: number;
   yearsExperience?: number;
   primaryEvents?: string[];
@@ -96,9 +97,26 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
             type="password"
             value={data.password}
             onChange={(e) => updateData({ password: e.target.value })}
-            placeholder="••••••••"
+            placeholder="Create a secure password"
           />
         </div>
+        
+        {data.role === 'athlete' && (
+          <div>
+            <Label htmlFor="coachCode">Coach Code (Optional)</Label>
+            <Input
+              id="coachCode"
+              type="text"
+              value={data.coachCode || ''}
+              onChange={(e) => updateData({ coachCode: e.target.value.toUpperCase() })}
+              placeholder="Enter your coach's code (e.g., COACH123)"
+              maxLength={10}
+            />
+            <p className="text-xs mt-1" style={{ color: athleticTechTheme.colors.text.secondary }}>
+              If your coach gave you a code, enter it here to connect with them
+            </p>
+          </div>
+        )}
 
         <div>
           <Label>I am a...</Label>
@@ -405,29 +423,31 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
         </CardHeader>
 
         <CardContent>
-          {renderStep()}
+          <form onSubmit={(e) => { e.preventDefault(); step === 5 ? handleComplete() : nextStep(); }}>
+            {renderStep()}
 
-          <div className="flex justify-end mt-8">
-            {step === 5 ? (
-              <Button 
-                onClick={handleComplete}
-                style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
-                disabled={!data.fullName || !data.email || !data.password}
-              >
-                Complete Setup
-                <Trophy className="h-4 w-4 ml-2" />
-              </Button>
-            ) : (
-              <Button 
-                onClick={nextStep}
-                style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
-                disabled={step === 1 && (!data.fullName || !data.email || !data.password)}
-              >
-                Continue
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            )}
-          </div>
+            <div className="flex justify-end mt-8">
+              {step === 5 ? (
+                <Button 
+                  type="submit"
+                  style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
+                  disabled={!data.fullName || !data.email || !data.password}
+                >
+                  Complete Setup
+                  <Trophy className="h-4 w-4 ml-2" />
+                </Button>
+              ) : (
+                <Button 
+                  type="submit"
+                  style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
+                  disabled={step === 1 && (!data.fullName || !data.email || !data.password)}
+                >
+                  Continue
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              )}
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

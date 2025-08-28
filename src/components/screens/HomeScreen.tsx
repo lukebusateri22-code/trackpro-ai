@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
+import { useAuth } from '@/components/auth/AuthProvider';
 import athleticTechTheme from '@/lib/athleticTechTheme';
 import { VideoAnalysisModal } from '@/components/VideoAnalysisModal';
 import AICoachChat from '@/components/AICoachChat';
@@ -18,6 +19,7 @@ import {
 
 const HomeScreen: React.FC = () => {
   const { user, isCoach } = useUser();
+  const { user: authUser, profile } = useAuth();
   const [showVideoAnalysis, setShowVideoAnalysis] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
   const [showTrainingPlan, setShowTrainingPlan] = useState(false);
@@ -73,7 +75,7 @@ const HomeScreen: React.FC = () => {
         }}
       >
         <h1 className="text-2xl font-bold mb-2">
-          Welcome back, {user?.username}! 🏃‍♂️
+          Welcome back, {authUser?.email?.split('@')[0] || profile?.username || user?.username || 'Athlete'}! 🏃‍♂️
         </h1>
         <p className="opacity-90">
           {isCoach 

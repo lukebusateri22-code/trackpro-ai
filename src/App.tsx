@@ -49,7 +49,9 @@ const AppRoutes: React.FC = () => {
             yearsCoaching: data.yearsCoaching,
             specialtyEvents: data.specialtyEvents,
             coachingPhilosophy: data.coachingPhilosophy,
-            yearsExperience: data.yearsExperience
+            yearsExperience: data.yearsExperience,
+            coachCode: data.coachCode,
+            hasCoach: !!data.coachCode
           };
           localStorage.setItem('onboardingData', JSON.stringify(additionalData));
           

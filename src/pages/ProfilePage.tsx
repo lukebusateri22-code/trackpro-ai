@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Navigation from '@/components/Navigation';
 import PageLayout from '@/components/layout/PageLayout';
 import ActionCard from '@/components/ui/ActionCard';
+import CoachCodeDisplay from '@/components/CoachCodeDisplay';
 import { useUser } from '@/contexts/UserContext';
 import { useAuth } from '@/components/auth/AuthProvider';
 import athleticTechTheme from '@/lib/athleticTechTheme';
@@ -116,6 +117,11 @@ const ProfilePage: React.FC = () => {
           showStats={true}
           stats={profileStats}
         >
+          {/* Coach Code Display (for coaches only) */}
+          {profile?.role === 'coach' && (
+            <CoachCodeDisplay />
+          )}
+          
           {/* Profile Actions Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {profileActions.map((action, index) => (
@@ -231,6 +237,40 @@ const ProfilePage: React.FC = () => {
                   </span>
                   <span style={{ color: athleticTechTheme.colors.text.primary }}>
                     {onboardingData.coachingLevel.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </span>
+                </div>
+              )}
+              
+              {onboardingData.hasCoach && (
+                <div className="flex justify-between items-center">
+                  <span className="font-medium" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                    Coach Status
+                  </span>
+                  <span 
+                    className="px-2 py-1 rounded-md text-sm font-medium"
+                    style={{
+                      backgroundColor: athleticTechTheme.colors.performance.excellent,
+                      color: athleticTechTheme.colors.text.inverse
+                    }}
+                  >
+                    Connected to Coach
+                  </span>
+                </div>
+              )}
+              
+              {!onboardingData.hasCoach && profile?.role === 'athlete' && (
+                <div className="flex justify-between items-center">
+                  <span className="font-medium" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                    Coach Status
+                  </span>
+                  <span 
+                    className="px-2 py-1 rounded-md text-sm font-medium"
+                    style={{
+                      backgroundColor: athleticTechTheme.colors.surface.elevated,
+                      color: athleticTechTheme.colors.text.secondary
+                    }}
+                  >
+                    Independent Training
                   </span>
                 </div>
               )}
