@@ -320,7 +320,7 @@ const WorkoutCreator: React.FC<WorkoutCreatorProps> = ({ onSave, onCancel, athle
                       variant="ghost"
                       size="sm"
                       onClick={() => removeExercise(index)}
-                      style={{ color: athleticTechTheme.colors.status.error }}
+                      style={{ color: '#ef4444' }}
                     >
                       <X size={16} />
                     </Button>
@@ -332,7 +332,7 @@ const WorkoutCreator: React.FC<WorkoutCreatorProps> = ({ onSave, onCancel, athle
                       <Input
                         type="number"
                         value={exercise.sets}
-                        onChange={(e) => updateExercise(index, { sets: parseInt(e.target.value) })}
+                        onChange={(e) => updateExercise(index, { sets: parseInt(e.target.value) || 0 })}
                         size="sm"
                       />
                     </div>
@@ -342,7 +342,7 @@ const WorkoutCreator: React.FC<WorkoutCreatorProps> = ({ onSave, onCancel, athle
                         <Input
                           type="number"
                           value={exercise.reps}
-                          onChange={(e) => updateExercise(index, { reps: parseInt(e.target.value) })}
+                          onChange={(e) => updateExercise(index, { reps: parseInt(e.target.value) || 0 })}
                           size="sm"
                         />
                       </div>
@@ -362,7 +362,7 @@ const WorkoutCreator: React.FC<WorkoutCreatorProps> = ({ onSave, onCancel, athle
                       <Input
                         type="number"
                         value={exercise.restPeriod}
-                        onChange={(e) => updateExercise(index, { restPeriod: parseInt(e.target.value) })}
+                        onChange={(e) => updateExercise(index, { restPeriod: parseInt(e.target.value) || 0 })}
                         size="sm"
                       />
                     </div>

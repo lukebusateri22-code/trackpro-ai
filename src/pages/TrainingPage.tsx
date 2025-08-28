@@ -39,6 +39,9 @@ const TrainingPage: React.FC = () => {
   // Determine user type: coach, athlete_with_coach, athlete_without_coach
   const userType = profile?.role === 'coach' ? 'coach' : 
                    (hasCoach ? 'athlete_with_coach' : 'athlete_without_coach');
+  
+  // Debug logging
+  console.log('🚀 TrainingPage Rendered!', { userType, profile: profile?.role, hasCoach, onboardingData });
 
   // Stats based on user type
   const getStatsForUserType = () => {
