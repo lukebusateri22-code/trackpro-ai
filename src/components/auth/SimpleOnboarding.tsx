@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,19 +45,46 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
   const totalSteps = 5;
   const progress = (step / totalSteps) * 100;
 
-  const updateData = (updates: Partial<OnboardingData>) => {
-    setData(prev => ({ ...prev, ...updates }));
-  };
-  
-  // Stable input handlers to prevent re-renders
-  const handleInputChange = (field: keyof OnboardingData) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    setData(prev => ({ ...prev, [field]: value }));
-  };
-  
-  const handleSelectChange = (field: keyof OnboardingData) => (value: string) => {
-    setData(prev => ({ ...prev, [field]: value }));
-  };
+  // Use useCallback to create stable handlers
+  const handleFullNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setData(prev => ({ ...prev, fullName: e.target.value }));
+  }, []);
+
+  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setData(prev => ({ ...prev, email: e.target.value }));
+  }, []);
+
+  const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setData(prev => ({ ...prev, password: e.target.value }));
+  }, []);
+
+  const handleCoachCodeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setData(prev => ({ ...prev, coachCode: e.target.value.toUpperCase() }));
+  }, []);
+
+  const handleAgeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setData(prev => ({ ...prev, age: parseInt(e.target.value) || undefined }));
+  }, []);
+
+  const handleExperienceChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setData(prev => ({ ...prev, yearsExperience: parseInt(e.target.value) || undefined }));
+  }, []);
+
+  const handleCoachingYearsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setData(prev => ({ ...prev, yearsCoaching: parseInt(e.target.value) || undefined }));
+  }, []);
+
+  const handleGoalsChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setData(prev => ({ ...prev, trainingGoals: e.target.value }));
+  }, []);
+
+  const handlePhilosophyChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setData(prev => ({ ...prev, coachingPhilosophy: e.target.value }));
+  }, []);
+
+  const selectRole = useCallback((role: 'athlete' | 'coach') => {
+    setData(prev => ({ ...prev, role }));
+  }, []);
 
   const nextStep = () => setStep(prev => Math.min(prev + 1, totalSteps));
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
@@ -84,7 +111,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
           <Input
             id="fullName"
             value={data.fullName}
-            onChange={handleInputChange('fullName')}
+            onChange={handleFullNameChange}
             placeholder="Enter your full name"
           />
         </div>
@@ -95,7 +122,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
             id="email"
             type="email"
             value={data.email}
-            onChange={handleInputChange('email')}
+            onChange={handleEmailChange}
             placeholder="your.email@example.com"
           />
         </div>
@@ -106,7 +133,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
             id="password"
             type="password"
             value={data.password}
-            onChange={handleInputChange('password')}
+            onChange={handlePasswordChange}
             placeholder="Create a secure password"
           />
         </div>
@@ -118,7 +145,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
               id="coachCode"
               type="text"
               value={data.coachCode || ''}
-              onChange={(e) => setData(prev => ({ ...prev, coachCode: e.target.value.toUpperCase() }))}
+              onChange={handleCoachCodeChange}
               placeholder="Enter your coach's code (e.g., COACH123)"
               maxLength={10}
             />
@@ -134,7 +161,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
             <Card 
               className={`cursor-pointer transition-all ${data.role === 'athlete' ? 'ring-2 ring-blue-500' : ''}`}
               style={{ backgroundColor: athleticTechTheme.colors.surface.elevated }}
-              onClick={() => updateData({ role: 'athlete' })}
+              onClick={() => selectRole('athlete')}
             >
               <CardContent className="p-4 text-center">
                 <User className="h-8 w-8 mx-auto mb-2" style={{ color: athleticTechTheme.colors.primary.track }} />
@@ -148,7 +175,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
             <Card 
               className={`cursor-pointer transition-all ${data.role === 'coach' ? 'ring-2 ring-blue-500' : ''}`}
               style={{ backgroundColor: athleticTechTheme.colors.surface.elevated }}
-              onClick={() => updateData({ role: 'coach' })}
+              onClick={() => selectRole('coach')}
             >
               <CardContent className="p-4 text-center">
                 <Trophy className="h-8 w-8 mx-auto mb-2" style={{ color: athleticTechTheme.colors.primary.power }} />
@@ -185,7 +212,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
                 id="age"
                 type="number"
                 value={data.age || ''}
-                onChange={(e) => setData(prev => ({ ...prev, age: parseInt(e.target.value) || undefined }))}
+                onChange={handleAgeChange}
                 placeholder="18"
               />
             </div>
@@ -195,7 +222,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
                 id="experience"
                 type="number"
                 value={data.yearsExperience || ''}
-                onChange={(e) => setData(prev => ({ ...prev, yearsExperience: parseInt(e.target.value) || undefined }))}
+                onChange={handleExperienceChange}
                 placeholder="5"
               />
             </div>
@@ -204,7 +231,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
           <>
             <div>
               <Label>Coaching Level</Label>
-              <Select value={data.coachingLevel} onValueChange={(value) => updateData({ coachingLevel: value })}>
+              <Select value={data.coachingLevel} onValueChange={(value) => setData(prev => ({ ...prev, coachingLevel: value }))}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select your coaching level" />
                 </SelectTrigger>
@@ -223,7 +250,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
                 id="yearsCoaching"
                 type="number"
                 value={data.yearsCoaching || ''}
-                onChange={(e) => setData(prev => ({ ...prev, yearsCoaching: parseInt(e.target.value) || undefined }))}
+                onChange={handleCoachingYearsChange}
                 placeholder="5"
               />
             </div>
@@ -272,16 +299,18 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
                           const current = currentEvents || [];
                           if (checked && (!maxReached || isSelected)) {
                             const updated = [...current, event.name];
-                            updateData(data.role === 'athlete' 
-                              ? { primaryEvents: updated }
-                              : { specialtyEvents: updated }
-                            );
+                            setData(prev => ({ ...prev, 
+                              ...(data.role === 'athlete' 
+                                ? { primaryEvents: updated }
+                                : { specialtyEvents: updated })
+                            }));
                           } else if (!checked) {
                             const updated = current.filter(e => e !== event.name);
-                            updateData(data.role === 'athlete'
-                              ? { primaryEvents: updated }
-                              : { specialtyEvents: updated }
-                            );
+                            setData(prev => ({ ...prev,
+                              ...(data.role === 'athlete'
+                                ? { primaryEvents: updated }
+                                : { specialtyEvents: updated })
+                            }));
                           }
                         }}
                         disabled={maxReached && !isSelected && data.role === 'athlete'}
@@ -335,7 +364,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
                         value={data.personalRecords?.[event] || ''}
                         onChange={(e) => {
                           const newPRs = { ...data.personalRecords, [event]: e.target.value };
-                          updateData({ personalRecords: newPRs });
+                          setData(prev => ({ ...prev, personalRecords: newPRs }));
                         }}
                       />
                     </div>
@@ -349,7 +378,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
                 id="goals"
                 placeholder="What are your main training goals? (e.g., qualify for nationals, improve 100m time, etc.)"
                 value={data.trainingGoals || ''}
-                onChange={handleInputChange('trainingGoals')}
+                onChange={handleGoalsChange}
                 rows={3}
               />
             </div>
@@ -361,7 +390,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
               id="philosophy"
               placeholder="Describe your coaching philosophy and approach to training athletes..."
               value={data.coachingPhilosophy || ''}
-              onChange={handleInputChange('coachingPhilosophy')}
+              onChange={handlePhilosophyChange}
               rows={4}
             />
           </div>
