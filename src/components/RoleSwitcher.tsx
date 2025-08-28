@@ -1,14 +1,22 @@
 import React from 'react';
 import { useUser } from '@/contexts/UserContext';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { UserRole } from '@/types/coach-athlete';
 import athleticTechTheme from '@/lib/athleticTechTheme';
 import { Users, Target } from 'lucide-react';
 
 const RoleSwitcher: React.FC = () => {
   const { user, switchRole, isCoach, isAthlete } = useUser();
+  const { profile } = useAuth();
 
   if (!user) return null;
+  
+  // Hide role switcher for athletes - they can't switch to coach view
+  if (profile?.role === 'athlete') return null;
 
+  // Only show role switcher for coaches
+  if (profile?.role !== 'coach') return null;
+  
   return (
     <div className="flex items-center space-x-2">
       <button

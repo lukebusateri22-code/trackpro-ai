@@ -41,7 +41,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
     role: 'athlete'
   });
 
-  const totalSteps = data.role === 'athlete' ? 4 : 4;
+  const totalSteps = 5;
   const progress = (step / totalSteps) * 100;
 
   const updateData = (updates: Partial<OnboardingData>) => {
