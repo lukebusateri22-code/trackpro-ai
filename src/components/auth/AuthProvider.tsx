@@ -34,6 +34,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Check if we're in demo mode
+  const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true';
 
   // Load user profile
   const loadProfile = async (userId: string) => {
@@ -55,6 +58,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     let mounted = true;
 
     const initializeAuth = async () => {
+      if (isDemoMode) {
+        // Demo mode: just set loading to false
+        console.log('Demo mode: Skipping Supabase initialization');
+        setTimeout(() => {
+          if (mounted) {
+            setLoading(false);
+          }
+        }, 1000);
+        return;
+      }
+      
       try {
         // Get initial session
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
@@ -84,39 +98,73 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     initializeAuth();
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.email);
-        
-        if (mounted) {
-          setSession(session);
-          setUser(session?.user ?? null);
+    if (!isDemoMode) {
+      // Listen for auth changes only in non-demo mode
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          console.log('Auth state change:', event, session?.user?.email);
+          
+          if (mounted) {
+            setSession(session);
+            setUser(session?.user ?? null);
 
-          if (session?.user) {
-            // Load profile for authenticated user
-            const userProfile = await loadProfile(session.user.id);
-            if (mounted) {
-              setProfile(userProfile);
+            if (session?.user) {
+              // Load profile for authenticated user
+              const userProfile = await loadProfile(session.user.id);
+              if (mounted) {
+                setProfile(userProfile);
+              }
+            } else {
+              // Clear profile for unauthenticated user
+              setProfile(null);
             }
-          } else {
-            // Clear profile for unauthenticated user
-            setProfile(null);
-          }
 
-          setLoading(false);
+            setLoading(false);
+          }
         }
-      }
-    );
+      );
+
+      return () => {
+        mounted = false;
+        subscription.unsubscribe();
+      };
+    }
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
     };
   }, []);
 
   // Sign up function
   const signUp = async (email: string, password: string, userData?: Partial<Profile>) => {
+    if (isDemoMode) {
+      // Demo mode: simulate successful signup
+      console.log('Demo mode: Simulating signup for', email);
+      const mockUser = {
+        id: 'demo-user-' + Date.now(),
+        email,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      } as User;
+      
+      const mockProfile = {
+        id: mockUser.id,
+        username: userData?.username || email.split('@')[0],
+        full_name: userData?.full_name || 'Demo User',
+        role: userData?.role || 'athlete',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      } as Profile;
+      
+      setTimeout(() => {
+        setUser(mockUser);
+        setProfile(mockProfile);
+        setSession({ user: mockUser } as Session);
+      }, 1000);
+      
+      return { error: null };
+    }
+    
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -145,6 +193,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Sign in function
   const signIn = async (email: string, password: string) => {
+    if (isDemoMode) {
+      // Demo mode: simulate successful signin
+      console.log('Demo mode: Simulating signin for', email);
+      const mockUser = {
+        id: 'demo-user-signin',
+        email,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      } as User;
+      
+      const mockProfile = {
+        id: mockUser.id,
+        username: email.split('@')[0],
+        full_name: 'Demo User',
+        role: 'athlete',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      } as Profile;
+      
+      setTimeout(() => {
+        setUser(mockUser);
+        setProfile(mockProfile);
+        setSession({ user: mockUser } as Session);
+      }, 500);
+      
+      return { error: null };
+    }
+    
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -165,6 +241,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Sign out function
   const signOut = async () => {
+    if (isDemoMode) {
+      // Demo mode: just clear local state
+      console.log('Demo mode: Simulating signout');
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      return { error: null };
+    }
+    
     try {
       const { error } = await supabase.auth.signOut();
       
