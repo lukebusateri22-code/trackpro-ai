@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft, Settings, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUser } from '@/contexts/UserContext';
+import { useAuth } from '@/components/auth/AuthProvider';
 import RoleSwitcher from './RoleSwitcher';
 import athleticTechTheme from '@/lib/athleticTechTheme';
 
@@ -23,6 +24,7 @@ const Header: React.FC<HeaderProps> = ({
   className 
 }) => {
   const { user, isCoach } = useUser();
+  const { user: authUser, profile } = useAuth();
 
   return (
     <header 
@@ -47,9 +49,9 @@ const Header: React.FC<HeaderProps> = ({
         )}
         <div>
           <h1 className="text-xl font-bold">{title}</h1>
-          {user && (
+          {(user || authUser) && (
             <p className="text-sm opacity-80 capitalize">
-              {isCoach ? '🏃‍♂️ Coach Mode' : '🎯 Athlete Mode'} • {user.username}
+              {isCoach ? '🏃‍♂️ Coach Mode' : '🎯 Athlete Mode'} • {authUser?.email?.split('@')[0] || profile?.username || user?.username || 'User'}
             </p>
           )}
         </div>

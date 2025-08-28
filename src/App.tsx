@@ -39,10 +39,25 @@ const AppRoutes: React.FC = () => {
     return (
       <SimpleOnboarding 
         onComplete={async (data) => {
+          // Store additional onboarding data in localStorage for now
+          // TODO: Extend database schema to support these fields
+          const additionalData = {
+            primaryEvents: data.primaryEvents,
+            personalRecords: data.personalRecords,
+            trainingGoals: data.trainingGoals,
+            coachingLevel: data.coachingLevel,
+            yearsCoaching: data.yearsCoaching,
+            specialtyEvents: data.specialtyEvents,
+            coachingPhilosophy: data.coachingPhilosophy,
+            yearsExperience: data.yearsExperience
+          };
+          localStorage.setItem('onboardingData', JSON.stringify(additionalData));
+          
           const { error } = await signUp(data.email, data.password, {
             full_name: data.fullName,
             role: data.role,
-            username: data.email.split('@')[0]
+            username: data.email.split('@')[0],
+            age: data.age
           });
           
           if (error) {

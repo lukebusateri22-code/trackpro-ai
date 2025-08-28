@@ -19,32 +19,44 @@ import {
 
 const ProfilePage: React.FC = () => {
   const { user, isCoach } = useUser();
-  const { signOut } = useAuth();
+  const { signOut, user: authUser, profile } = useAuth();
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  
+  // Get additional onboarding data from localStorage
+  const getOnboardingData = () => {
+    try {
+      const data = localStorage.getItem('onboardingData');
+      return data ? JSON.parse(data) : {};
+    } catch {
+      return {};
+    }
+  };
+  
+  const onboardingData = getOnboardingData();
 
   const profileStats = [
     {
       icon: Award,
-      value: isCoach ? '12' : '8',
-      label: isCoach ? 'Athletes' : 'PRs Set',
+      value: isCoach ? (onboardingData.specialtyEvents?.length || '3') : (onboardingData.personalRecords ? Object.keys(onboardingData.personalRecords).filter(k => onboardingData.personalRecords[k]).length : '3'),
+      label: isCoach ? 'Specialties' : 'PRs Set',
       color: athleticTechTheme.colors.performance.excellent
     },
     {
       icon: BarChart3,
-      value: isCoach ? '24' : '156',
-      label: isCoach ? 'Plans Created' : 'Workouts',
+      value: isCoach ? '24' : (onboardingData.primaryEvents?.length || '3'),
+      label: isCoach ? 'Plans Created' : 'Events',
       color: athleticTechTheme.colors.primary.track
     },
     {
       icon: User,
-      value: '2.5y',
+      value: onboardingData.yearsExperience ? `${onboardingData.yearsExperience}y` : (onboardingData.yearsCoaching ? `${onboardingData.yearsCoaching}y` : '2.5y'),
       label: 'Experience',
       color: athleticTechTheme.colors.primary.power
     },
     {
       icon: Shield,
-      value: isCoach ? 'Coach' : 'Athlete',
+      value: profile?.role || (isCoach ? 'Coach' : 'Athlete'),
       label: 'Role',
       color: athleticTechTheme.colors.primary.field
     }
@@ -97,8 +109,8 @@ const ProfilePage: React.FC = () => {
       <Header title="Profile" showSettings />
       <div className="flex-1 p-4 pb-20">
         <PageLayout
-          title={user?.username || 'Your Profile'}
-          subtitle={`${isCoach ? 'Coach' : 'Athlete'} • Member since ${new Date().getFullYear()}`}
+          title={profile?.full_name || authUser?.email?.split('@')[0] || user?.username || 'Your Profile'}
+          subtitle={`${profile?.role || (isCoach ? 'Coach' : 'Athlete')} • Member since ${new Date().getFullYear()}`}
           headerIcon={User}
           headerGradient={athleticTechTheme.gradients.hero}
           showStats={true}
@@ -144,7 +156,7 @@ const ProfilePage: React.FC = () => {
                 <span 
                   style={{ color: athleticTechTheme.colors.text.primary }}
                 >
-                  {'demo@trackpro.ai'}
+                  {authUser?.email || 'demo@trackpro.ai'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -157,7 +169,7 @@ const ProfilePage: React.FC = () => {
                 <span 
                   style={{ color: athleticTechTheme.colors.text.primary }}
                 >
-                  {user?.username || 'demo_user'}
+                  {profile?.username || authUser?.email?.split('@')[0] || user?.username || 'demo_user'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -174,10 +186,102 @@ const ProfilePage: React.FC = () => {
                     color: athleticTechTheme.colors.text.inverse
                   }}
                 >
-                  {isCoach ? 'Coach' : 'Athlete'}
+                  {profile?.role || (isCoach ? 'Coach' : 'Athlete')}
                 </span>
               </div>
+              
+              {/* Additional onboarding data */}
+              {onboardingData.yearsExperience && (
+                <div className="flex justify-between items-center">
+                  <span className="font-medium" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                    Experience
+                  </span>
+                  <span style={{ color: athleticTechTheme.colors.text.primary }}>
+                    {onboardingData.yearsExperience} years
+                  </span>
+                </div>
+              )}
+              
+              {onboardingData.primaryEvents && onboardingData.primaryEvents.length > 0 && (
+                <div className="flex justify-between items-center">
+                  <span className="font-medium" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                    Events
+                  </span>
+                  <span style={{ color: athleticTechTheme.colors.text.primary }}>
+                    {onboardingData.primaryEvents.join(', ')}
+                  </span>
+                </div>
+              )}
+              
+              {onboardingData.specialtyEvents && onboardingData.specialtyEvents.length > 0 && (
+                <div className="flex justify-between items-center">
+                  <span className="font-medium" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                    Specialties
+                  </span>
+                  <span style={{ color: athleticTechTheme.colors.text.primary }}>
+                    {onboardingData.specialtyEvents.join(', ')}
+                  </span>
+                </div>
+              )}
+              
+              {onboardingData.coachingLevel && (
+                <div className="flex justify-between items-center">
+                  <span className="font-medium" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                    Coaching Level
+                  </span>
+                  <span style={{ color: athleticTechTheme.colors.text.primary }}>
+                    {onboardingData.coachingLevel.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </span>
+                </div>
+              )}
             </div>
+            
+            {/* Personal Records Section */}
+            {onboardingData.personalRecords && Object.keys(onboardingData.personalRecords).length > 0 && (
+              <div className="mt-6">
+                <h4 className="font-semibold mb-3" style={{ color: athleticTechTheme.colors.text.primary }}>
+                  Personal Records
+                </h4>
+                <div className="space-y-2">
+                  {Object.entries(onboardingData.personalRecords).map(([event, record]) => (
+                    record && (
+                      <div key={event} className="flex justify-between items-center">
+                        <span className="text-sm" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                          {event}
+                        </span>
+                        <span className="text-sm font-medium" style={{ color: athleticTechTheme.colors.text.primary }}>
+                          {String(record)}
+                        </span>
+                      </div>
+                    )
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Training Goals */}
+            {onboardingData.trainingGoals && (
+              <div className="mt-6">
+                <h4 className="font-semibold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                  Training Goals
+                </h4>
+                <p className="text-sm" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                  {onboardingData.trainingGoals}
+                </p>
+              </div>
+            )}
+            
+            {/* Coaching Philosophy */}
+            {onboardingData.coachingPhilosophy && (
+              <div className="mt-6">
+                <h4 className="font-semibold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                  Coaching Philosophy
+                </h4>
+                <p className="text-sm" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                  {onboardingData.coachingPhilosophy}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Sign Out Button */}

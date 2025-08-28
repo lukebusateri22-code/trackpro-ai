@@ -6,7 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, ArrowRight, User, Trophy } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ArrowLeft, ArrowRight, User, Trophy, Target, Award } from 'lucide-react';
+import { TRACK_EVENTS, getEventsByCategory } from '@/lib/events';
 import athleticTechTheme from '@/lib/athleticTechTheme';
 
 interface OnboardingData {
@@ -16,8 +18,13 @@ interface OnboardingData {
   role: 'athlete' | 'coach';
   age?: number;
   yearsExperience?: number;
+  primaryEvents?: string[];
+  personalRecords?: { [key: string]: string };
+  trainingGoals?: string;
   coachingLevel?: string;
   yearsCoaching?: number;
+  specialtyEvents?: string[];
+  coachingPhilosophy?: string;
 }
 
 interface SimpleOnboardingProps {
@@ -34,7 +41,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
     role: 'athlete'
   });
 
-  const totalSteps = 3;
+  const totalSteps = data.role === 'athlete' ? 4 : 4;
   const progress = (step / totalSteps) * 100;
 
   const updateData = (updates: Partial<OnboardingData>) => {
@@ -198,7 +205,144 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
     </div>
   );
 
-  // Step 3: Confirmation
+  // Step 3: Events and Specialization
+  const EventsStep = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <Target className="h-12 w-12 mx-auto mb-4" style={{ color: athleticTechTheme.colors.primary.track }} />
+        <h2 className="text-2xl font-bold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+          {data.role === 'athlete' ? 'Your Events' : 'Coaching Specialties'}
+        </h2>
+        <p style={{ color: athleticTechTheme.colors.text.secondary }}>
+          {data.role === 'athlete' 
+            ? 'Select up to 3 events you compete in or want to focus on'
+            : 'Select the events you specialize in coaching'
+          }
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 max-h-80 overflow-y-auto">
+        {['Sprints', 'Jumps', 'Throws', 'Distance'].map((category) => {
+          const events = getEventsByCategory(category);
+          return (
+            <div key={category}>
+              <h4 className="font-semibold text-sm mb-2 capitalize" style={{ color: athleticTechTheme.colors.text.primary }}>
+                {category}
+              </h4>
+              <div className="grid grid-cols-2 gap-2">
+                {events.map((event) => {
+                  const currentEvents = data.role === 'athlete' ? data.primaryEvents : data.specialtyEvents;
+                  const isSelected = currentEvents?.includes(event.name) || false;
+                  const maxReached = data.role === 'athlete' && (currentEvents?.length || 0) >= 3;
+                  
+                  return (
+                    <div key={event.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={event.id}
+                        checked={isSelected}
+                        onCheckedChange={(checked) => {
+                          const current = currentEvents || [];
+                          if (checked && (!maxReached || isSelected)) {
+                            const updated = [...current, event.name];
+                            updateData(data.role === 'athlete' 
+                              ? { primaryEvents: updated }
+                              : { specialtyEvents: updated }
+                            );
+                          } else if (!checked) {
+                            const updated = current.filter(e => e !== event.name);
+                            updateData(data.role === 'athlete'
+                              ? { primaryEvents: updated }
+                              : { specialtyEvents: updated }
+                            );
+                          }
+                        }}
+                        disabled={maxReached && !isSelected && data.role === 'athlete'}
+                      />
+                      <Label htmlFor={event.id} className="text-sm">{event.name}</Label>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {data.role === 'athlete' && (
+        <div className="text-center text-sm" style={{ color: athleticTechTheme.colors.text.secondary }}>
+          Selected: {data.primaryEvents?.length || 0}/3 events
+        </div>
+      )}
+    </div>
+  );
+
+  // Step 4: Personal Records and Goals
+  const PersonalRecordsStep = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <Award className="h-12 w-12 mx-auto mb-4" style={{ color: athleticTechTheme.colors.primary.power }} />
+        <h2 className="text-2xl font-bold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+          {data.role === 'athlete' ? 'Personal Records & Goals' : 'Coaching Philosophy'}
+        </h2>
+        <p style={{ color: athleticTechTheme.colors.text.secondary }}>
+          {data.role === 'athlete'
+            ? 'Share your best times/distances and training goals'
+            : 'Tell us about your coaching approach and philosophy'
+          }
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        {data.role === 'athlete' ? (
+          <>
+            {data.primaryEvents && data.primaryEvents.length > 0 && (
+              <div>
+                <Label>Personal Records (Optional)</Label>
+                <div className="space-y-2 mt-2">
+                  {data.primaryEvents.map((event) => (
+                    <div key={event} className="flex items-center space-x-2">
+                      <Label className="text-sm w-24">{event}:</Label>
+                      <Input
+                        placeholder="e.g., 12.50s or 6.20m"
+                        value={data.personalRecords?.[event] || ''}
+                        onChange={(e) => {
+                          const newPRs = { ...data.personalRecords, [event]: e.target.value };
+                          updateData({ personalRecords: newPRs });
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div>
+              <Label htmlFor="goals">Training Goals</Label>
+              <Textarea
+                id="goals"
+                placeholder="What are your main training goals? (e.g., qualify for nationals, improve 100m time, etc.)"
+                value={data.trainingGoals || ''}
+                onChange={(e) => updateData({ trainingGoals: e.target.value })}
+                rows={3}
+              />
+            </div>
+          </>
+        ) : (
+          <div>
+            <Label htmlFor="philosophy">Coaching Philosophy</Label>
+            <Textarea
+              id="philosophy"
+              placeholder="Describe your coaching philosophy and approach to training athletes..."
+              value={data.coachingPhilosophy || ''}
+              onChange={(e) => updateData({ coachingPhilosophy: e.target.value })}
+              rows={4}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // Step 5: Confirmation
   const ConfirmationStep = () => (
     <div className="space-y-6">
       <div className="text-center mb-6">
@@ -220,8 +364,14 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
           <p><strong>Role:</strong> {data.role}</p>
           {data.role === 'athlete' && data.age && <p><strong>Age:</strong> {data.age}</p>}
           {data.role === 'athlete' && data.yearsExperience && <p><strong>Experience:</strong> {data.yearsExperience} years</p>}
+          {data.role === 'athlete' && data.primaryEvents && data.primaryEvents.length > 0 && (
+            <p><strong>Events:</strong> {data.primaryEvents.join(', ')}</p>
+          )}
           {data.role === 'coach' && data.coachingLevel && <p><strong>Level:</strong> {data.coachingLevel}</p>}
           {data.role === 'coach' && data.yearsCoaching && <p><strong>Coaching Experience:</strong> {data.yearsCoaching} years</p>}
+          {data.role === 'coach' && data.specialtyEvents && data.specialtyEvents.length > 0 && (
+            <p><strong>Specialties:</strong> {data.specialtyEvents.join(', ')}</p>
+          )}
         </div>
       </div>
     </div>
@@ -231,7 +381,9 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
     switch (step) {
       case 1: return <BasicInfoStep />;
       case 2: return <RoleInfoStep />;
-      case 3: return <ConfirmationStep />;
+      case 3: return <EventsStep />;
+      case 4: return <PersonalRecordsStep />;
+      case 5: return <ConfirmationStep />;
       default: return <BasicInfoStep />;
     }
   };
@@ -256,7 +408,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
           {renderStep()}
 
           <div className="flex justify-end mt-8">
-            {step === totalSteps ? (
+            {step === 5 ? (
               <Button 
                 onClick={handleComplete}
                 style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
