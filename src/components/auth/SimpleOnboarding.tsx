@@ -48,6 +48,13 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
   const updateData = (updates: Partial<OnboardingData>) => {
     setData(prev => ({ ...prev, ...updates }));
   };
+  
+  // Prevent form submission on Enter key
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  };
 
   const nextStep = () => setStep(prev => Math.min(prev + 1, totalSteps));
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
@@ -75,7 +82,8 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
             id="fullName"
             value={data.fullName}
             onChange={(e) => updateData({ fullName: e.target.value })}
-            placeholder="John Doe"
+            placeholder="Enter your full name"
+            onKeyDown={(e) => e.stopPropagation()}
           />
         </div>
 
@@ -86,7 +94,8 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
             type="email"
             value={data.email}
             onChange={(e) => updateData({ email: e.target.value })}
-            placeholder="john@example.com"
+            placeholder="your.email@example.com"
+            onKeyDown={(e) => e.stopPropagation()}
           />
         </div>
 
@@ -98,6 +107,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
             value={data.password}
             onChange={(e) => updateData({ password: e.target.value })}
             placeholder="Create a secure password"
+            onKeyDown={(e) => e.stopPropagation()}
           />
         </div>
         
@@ -423,7 +433,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={(e) => { e.preventDefault(); step === 5 ? handleComplete() : nextStep(); }}>
+          <form onSubmit={(e) => { e.preventDefault(); step === 5 ? handleComplete() : nextStep(); }} onKeyDown={handleKeyDown}>
             {renderStep()}
 
             <div className="flex justify-end mt-8">
