@@ -333,7 +333,7 @@ const WorkoutCreator: React.FC<WorkoutCreatorProps> = ({ onSave, onCancel, athle
                         type="number"
                         value={exercise.sets}
                         onChange={(e) => updateExercise(index, { sets: parseInt(e.target.value) || 0 })}
-                        size="sm"
+                        className="text-sm"
                       />
                     </div>
                     {exercise.reps && (
@@ -343,7 +343,7 @@ const WorkoutCreator: React.FC<WorkoutCreatorProps> = ({ onSave, onCancel, athle
                           type="number"
                           value={exercise.reps}
                           onChange={(e) => updateExercise(index, { reps: parseInt(e.target.value) || 0 })}
-                          size="sm"
+                          className="text-sm"
                         />
                       </div>
                     )}
@@ -353,7 +353,7 @@ const WorkoutCreator: React.FC<WorkoutCreatorProps> = ({ onSave, onCancel, athle
                         <Input
                           value={exercise.duration}
                           onChange={(e) => updateExercise(index, { duration: e.target.value })}
-                          size="sm"
+                          className="text-sm"
                         />
                       </div>
                     )}
@@ -363,7 +363,7 @@ const WorkoutCreator: React.FC<WorkoutCreatorProps> = ({ onSave, onCancel, athle
                         type="number"
                         value={exercise.restPeriod}
                         onChange={(e) => updateExercise(index, { restPeriod: parseInt(e.target.value) || 0 })}
-                        size="sm"
+                        className="text-sm"
                       />
                     </div>
                   </div>

@@ -46,8 +46,31 @@ const FixedOnboarding: React.FC<FixedOnboardingProps> = ({ onComplete, onBack })
   const [coachingLevel, setCoachingLevel] = useState('');
   const [yearsCoaching, setYearsCoaching] = useState('');
   const [coachingPhilosophy, setCoachingPhilosophy] = useState('');
+  const [primaryEvents, setPrimaryEvents] = useState<string[]>([]);
+  const [personalRecords, setPersonalRecords] = useState<{ [key: string]: string }>({});
+  
+  // Track & Field Events
+  const trackFieldEvents = [
+    { name: '100m', category: 'Sprints' },
+    { name: '200m', category: 'Sprints' },
+    { name: '400m', category: 'Sprints' },
+    { name: '800m', category: 'Middle Distance' },
+    { name: '1500m', category: 'Middle Distance' },
+    { name: '5000m', category: 'Distance' },
+    { name: '10000m', category: 'Distance' },
+    { name: '110m Hurdles', category: 'Hurdles' },
+    { name: '400m Hurdles', category: 'Hurdles' },
+    { name: 'Long Jump', category: 'Jumps' },
+    { name: 'High Jump', category: 'Jumps' },
+    { name: 'Triple Jump', category: 'Jumps' },
+    { name: 'Pole Vault', category: 'Jumps' },
+    { name: 'Shot Put', category: 'Throws' },
+    { name: 'Discus', category: 'Throws' },
+    { name: 'Javelin', category: 'Throws' },
+    { name: 'Hammer Throw', category: 'Throws' }
+  ];
 
-  const totalSteps = 3; // Simplified to 3 steps
+  const totalSteps = role === 'athlete' ? 4 : 3; // 4 steps for athletes, 3 for coaches
   const progress = (step / totalSteps) * 100;
 
   const nextStep = () => setStep(prev => Math.min(prev + 1, totalSteps));
@@ -66,6 +89,8 @@ const FixedOnboarding: React.FC<FixedOnboardingProps> = ({ onComplete, onBack })
       coachingLevel: coachingLevel || undefined,
       yearsCoaching: yearsCoaching ? parseInt(yearsCoaching) : undefined,
       coachingPhilosophy: coachingPhilosophy || undefined,
+      primaryEvents: primaryEvents.length > 0 ? primaryEvents : undefined,
+      personalRecords: Object.keys(personalRecords).length > 0 ? personalRecords : undefined,
     };
     onComplete(data);
   };
@@ -240,30 +265,69 @@ const FixedOnboarding: React.FC<FixedOnboardingProps> = ({ onComplete, onBack })
         );
 
       case 3:
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
-                {role === 'athlete' ? 'Training Goals' : 'Coaching Philosophy'}
-              </h2>
-              <p style={{ color: athleticTechTheme.colors.text.secondary }}>
-                {role === 'athlete' ? 'What do you want to achieve?' : 'Describe your coaching approach'}
-              </p>
-            </div>
-            
-            <div className="space-y-4">
-              {role === 'athlete' ? (
-                <div>
-                  <Label htmlFor="goals">Training Goals</Label>
-                  <Textarea
-                    id="goals"
-                    placeholder="What are your main training goals? (e.g., qualify for nationals, improve 100m time, etc.)"
-                    value={trainingGoals}
-                    onChange={(e) => setTrainingGoals(e.target.value)}
-                    rows={3}
-                  />
+        if (role === 'athlete') {
+          return (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                  Your Events
+                </h2>
+                <p style={{ color: athleticTechTheme.colors.text.secondary }}>
+                  Select up to 3 events you compete in or want to focus on
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+                  {trackFieldEvents.map((event) => {
+                    const isSelected = primaryEvents.includes(event.name);
+                    const maxReached = primaryEvents.length >= 3;
+                    
+                    return (
+                      <Button
+                        key={event.name}
+                        variant={isSelected ? "default" : "outline"}
+                        size="sm"
+                        className="justify-start text-left h-auto py-2"
+                        disabled={maxReached && !isSelected}
+                        onClick={() => {
+                          if (isSelected) {
+                            setPrimaryEvents(prev => prev.filter(e => e !== event.name));
+                          } else if (!maxReached) {
+                            setPrimaryEvents(prev => [...prev, event.name]);
+                          }
+                        }}
+                        style={{
+                          backgroundColor: isSelected ? athleticTechTheme.colors.primary.track : 'transparent'
+                        }}
+                      >
+                        <div>
+                          <div className="font-medium">{event.name}</div>
+                          <div className="text-xs opacity-70">{event.category}</div>
+                        </div>
+                      </Button>
+                    );
+                  })}
                 </div>
-              ) : (
+                <p className="text-sm text-center" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                  Selected: {primaryEvents.length}/3
+                </p>
+              </div>
+            </div>
+          );
+        } else {
+          return (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                  Coaching Philosophy
+                </h2>
+                <p style={{ color: athleticTechTheme.colors.text.secondary }}>
+                  Describe your coaching approach
+                </p>
+              </div>
+              
+              <div className="space-y-4">
                 <div>
                   <Label htmlFor="philosophy">Coaching Philosophy</Label>
                   <Textarea
@@ -274,7 +338,57 @@ const FixedOnboarding: React.FC<FixedOnboardingProps> = ({ onComplete, onBack })
                     rows={4}
                   />
                 </div>
+              </div>
+            </div>
+          );
+        }
+        
+      case 4:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                Personal Records & Goals
+              </h2>
+              <p style={{ color: athleticTechTheme.colors.text.secondary }}>
+                Enter your current personal bests and training goals
+              </p>
+            </div>
+            
+            <div className="space-y-4">
+              {primaryEvents.length > 0 && (
+                <div>
+                  <Label>Personal Records</Label>
+                  <div className="space-y-3 mt-2">
+                    {primaryEvents.map((event) => (
+                      <div key={event} className="flex items-center space-x-2">
+                        <Label className="text-sm w-24">{event}:</Label>
+                        <Input
+                          placeholder="e.g., 12.50s or 6.20m"
+                          value={personalRecords[event] || ''}
+                          onChange={(e) => {
+                            setPersonalRecords(prev => ({
+                              ...prev,
+                              [event]: e.target.value
+                            }));
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
+              
+              <div>
+                <Label htmlFor="goals">Training Goals</Label>
+                <Textarea
+                  id="goals"
+                  placeholder="What are your main training goals? (e.g., qualify for nationals, improve 100m time, etc.)"
+                  value={trainingGoals}
+                  onChange={(e) => setTrainingGoals(e.target.value)}
+                  rows={3}
+                />
+              </div>
             </div>
           </div>
         );

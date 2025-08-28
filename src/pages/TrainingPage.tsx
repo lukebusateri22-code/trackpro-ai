@@ -6,6 +6,7 @@ import ActionCard from '@/components/ui/ActionCard';
 import WorkoutCreator from '@/components/workout/WorkoutCreator';
 import WorkoutCompletionModal from '@/components/training/WorkoutCompletionModal';
 import WorkoutLibrary from '@/components/training/WorkoutLibrary';
+import WorkoutCalendar from '@/components/training/WorkoutCalendar';
 import { WORKOUT_TEMPLATES } from '@/lib/workoutLibrary';
 import { useUser } from '@/contexts/UserContext';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -35,6 +36,7 @@ const TrainingPage: React.FC = () => {
   const [showWorkoutCreator, setShowWorkoutCreator] = useState(false);
   const [showWorkoutCompletion, setShowWorkoutCompletion] = useState(false);
   const [showWorkoutLibrary, setShowWorkoutLibrary] = useState(false);
+  const [showWorkoutCalendar, setShowWorkoutCalendar] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
   const [activeView, setActiveView] = useState('dashboard');
   
@@ -333,6 +335,36 @@ const TrainingPage: React.FC = () => {
             ))}
           </div>
 
+          {/* Calendar Section for Athletes with Coach */}
+          {userType === 'athlete_with_coach' && (
+            <div 
+              className="p-6 rounded-xl"
+              style={{
+                backgroundColor: athleticTechTheme.colors.surface.secondary,
+                border: `1px solid ${athleticTechTheme.colors.interactive.border}`
+              }}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 
+                  className="text-lg font-bold"
+                  style={{ color: athleticTechTheme.colors.text.primary }}
+                >
+                  Training Schedule
+                </h3>
+                <Button 
+                  onClick={() => setShowWorkoutCalendar(true)}
+                  style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
+                >
+                  <Calendar size={16} className="mr-2" />
+                  View Calendar
+                </Button>
+              </div>
+              <p style={{ color: athleticTechTheme.colors.text.secondary }}>
+                View your upcoming workouts assigned by your coach in calendar format
+              </p>
+            </div>
+          )}
+          
           {/* Recent Activity Section */}
           <div 
             className="p-6 rounded-xl"
@@ -427,6 +459,18 @@ const TrainingPage: React.FC = () => {
             setShowWorkoutCompletion(true);
           }}
           onClose={() => setShowWorkoutLibrary(false)}
+        />
+      )}
+      
+      {showWorkoutCalendar && (
+        <WorkoutCalendar
+          onSelectWorkout={(workout) => {
+            console.log('Selected workout from calendar:', workout);
+            setShowWorkoutCalendar(false);
+            // Could open workout details or completion modal here
+            alert(`Selected: ${workout.title} on ${new Date(workout.date).toLocaleDateString()}`);
+          }}
+          onClose={() => setShowWorkoutCalendar(false)}
         />
       )}
     </div>

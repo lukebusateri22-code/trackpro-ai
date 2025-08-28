@@ -16,7 +16,7 @@ import { RecoveryProvider } from '@/contexts/RecoveryContext';
 import { GoalsProvider } from '@/contexts/GoalsContext';
 import { AppProvider } from '@/contexts/AppContext';
 import { AuthProvider, useAuth } from '@/components/auth/AuthProvider';
-import AuthModal from '@/components/auth/AuthModal';
+import AuthModal from './components/auth/AuthModal';
 import FixedOnboarding from "./components/auth/FixedOnboarding";
 import LoadingScreen from '@/components/ui/LoadingScreen';
 import { Button } from '@/components/ui/button';
