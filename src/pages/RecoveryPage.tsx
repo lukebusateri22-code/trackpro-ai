@@ -1,87 +1,32 @@
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Navigation from '@/components/Navigation';
-import PageLayout from '@/components/layout/PageLayout';
-import ActionCard from '@/components/ui/ActionCard';
+import RecoveryDashboard from '@/components/recovery/RecoveryDashboard';
+import MentalHealthModal from '@/components/recovery/MentalHealthModal';
+import SleepTrackerModal from '@/components/recovery/SleepTrackerModal';
+import EnergyTrackerModal from '@/components/recovery/EnergyTrackerModal';
+import InjuryLogModal from '@/components/recovery/InjuryLogModal';
+import SupplementsModal from '@/components/recovery/SupplementsModal';
+import NutritionModal from '@/components/recovery/NutritionModal';
 import { useUser } from '@/contexts/UserContext';
 import athleticTechTheme from '@/lib/athleticTechTheme';
-import { 
-  Heart, 
-  Moon, 
-  Activity, 
-  Droplets, 
-  Brain, 
-  Thermometer,
-  Battery,
-  Zap
-} from 'lucide-react';
 
 const RecoveryPage: React.FC = () => {
   const { user, isCoach } = useUser();
-  const [showSleepLog, setShowSleepLog] = useState(false);
-  const [showWellness, setShowWellness] = useState(false);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
 
-  const recoveryStats = [
-    {
-      icon: Heart,
-      value: '68',
-      label: 'Resting HR',
-      color: athleticTechTheme.colors.performance.excellent
-    },
-    {
-      icon: Moon,
-      value: '7.5h',
-      label: 'Sleep',
-      color: athleticTechTheme.colors.primary.power
-    },
-    {
-      icon: Battery,
-      value: '85%',
-      label: 'Recovery',
-      color: athleticTechTheme.colors.primary.field
-    },
-    {
-      icon: Zap,
-      value: '92',
-      label: 'Readiness',
-      color: athleticTechTheme.colors.primary.track
-    }
-  ];
+  const handleOpenModal = (modalType: string) => {
+    setActiveModal(modalType);
+  };
 
-  const recoveryActions = [
-    {
-      title: 'Sleep Tracking',
-      description: 'Log and monitor your sleep quality and duration',
-      icon: Moon,
-      color: athleticTechTheme.colors.primary.power,
-      gradient: athleticTechTheme.gradients.power,
-      onClick: () => setShowSleepLog(true)
-    },
-    {
-      title: 'Wellness Check',
-      description: 'Daily wellness questionnaire and mood tracking',
-      icon: Heart,
-      color: athleticTechTheme.colors.performance.excellent,
-      gradient: athleticTechTheme.gradients.endurance,
-      onClick: () => setShowWellness(true)
-    },
-    {
-      title: 'Hydration Log',
-      description: 'Track your daily water intake and hydration levels',
-      icon: Droplets,
-      color: athleticTechTheme.colors.primary.field,
-      gradient: athleticTechTheme.gradients.speed,
-      onClick: () => console.log('Hydration clicked')
-    },
-    {
-      title: 'Recovery Tools',
-      description: 'Access recovery protocols and techniques',
-      icon: Activity,
-      color: athleticTechTheme.colors.primary.tech,
-      gradient: athleticTechTheme.gradients.tech,
-      onClick: () => console.log('Recovery tools clicked')
-    }
-  ];
+  const handleCloseModal = () => {
+    setActiveModal(null);
+  };
+
+  const handleSaveData = (data: any) => {
+    console.log('Recovery data saved:', data);
+    // Here you would typically save to your backend/database
+  };
 
   return (
     <div 
@@ -90,30 +35,52 @@ const RecoveryPage: React.FC = () => {
     >
       <Header title="Recovery" showSettings />
       <div className="flex-1 p-4 pb-20">
-        <PageLayout
-          title="Recovery Center"
-          subtitle="Monitor and optimize your recovery for peak performance"
-          headerIcon={Heart}
-          headerGradient={athleticTechTheme.gradients.endurance}
-          showStats={true}
-          stats={recoveryStats}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {recoveryActions.map((action, index) => (
-              <ActionCard
-                key={index}
-                title={action.title}
-                description={action.description}
-                icon={action.icon}
-                color={action.color}
-                gradient={action.gradient}
-                onClick={action.onClick}
-              />
-            ))}
-          </div>
-        </PageLayout>
+        <RecoveryDashboard onOpenModal={handleOpenModal} />
       </div>
       <Navigation activeTab="recovery" />
+      
+      {/* Recovery Modals */}
+      {activeModal === 'mental-health' && (
+        <MentalHealthModal
+          onClose={handleCloseModal}
+          onSave={handleSaveData}
+        />
+      )}
+      
+      {activeModal === 'sleep-tracker' && (
+        <SleepTrackerModal
+          onClose={handleCloseModal}
+          onSave={handleSaveData}
+        />
+      )}
+      
+      {activeModal === 'energy-tracker' && (
+        <EnergyTrackerModal
+          onClose={handleCloseModal}
+          onSave={handleSaveData}
+        />
+      )}
+      
+      {activeModal === 'injury-log' && (
+        <InjuryLogModal
+          onClose={handleCloseModal}
+          onSave={handleSaveData}
+        />
+      )}
+      
+      {activeModal === 'supplements' && (
+        <SupplementsModal
+          onClose={handleCloseModal}
+          onSave={handleSaveData}
+        />
+      )}
+      
+      {activeModal === 'nutrition' && (
+        <NutritionModal
+          onClose={handleCloseModal}
+          onSave={handleSaveData}
+        />
+      )}
     </div>
   );
 };

@@ -10,6 +10,10 @@ import WorkoutLibrary from '@/components/training/WorkoutLibrary';
 import WorkoutCalendar from '@/components/training/WorkoutCalendar';
 import WorkoutAssignmentModal from '@/components/training/WorkoutAssignmentModal';
 import AthleteProgressModal from '@/components/training/AthleteProgressModal';
+import UploadVideoModal from '@/components/training/UploadVideoModal';
+import TrainingHistoryModal from '@/components/training/TrainingHistoryModal';
+import GoalSettingModal from '@/components/training/GoalSettingModal';
+import ProgressTrackingModal from '@/components/training/ProgressTrackingModal';
 import { WORKOUT_TEMPLATES } from '@/lib/workoutLibrary';
 import { useUser } from '@/contexts/UserContext';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -42,6 +46,10 @@ const TrainingPage: React.FC = () => {
   const [showWorkoutCalendar, setShowWorkoutCalendar] = useState(false);
   const [showWorkoutAssignment, setShowWorkoutAssignment] = useState(false);
   const [showAthleteProgress, setShowAthleteProgress] = useState(false);
+  const [showUploadVideo, setShowUploadVideo] = useState(false);
+  const [showTrainingHistory, setShowTrainingHistory] = useState(false);
+  const [showGoalSetting, setShowGoalSetting] = useState(false);
+  const [showProgressTracking, setShowProgressTracking] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
   const [activeView, setActiveView] = useState('dashboard');
   
@@ -188,7 +196,7 @@ const TrainingPage: React.FC = () => {
             icon: Camera,
             color: athleticTechTheme.colors.primary.power,
             gradient: athleticTechTheme.gradients.endurance,
-            onClick: () => alert('Video upload feature coming soon!')
+            onClick: () => setShowUploadVideo(true)
           },
           {
             title: 'Training History',
@@ -196,7 +204,7 @@ const TrainingPage: React.FC = () => {
             icon: Award,
             color: athleticTechTheme.colors.primary.field,
             gradient: athleticTechTheme.gradients.tech,
-            onClick: () => alert('Training history feature coming soon!')
+            onClick: () => setShowTrainingHistory(true)
           }
         ];
       case 'athlete_without_coach':
@@ -223,7 +231,7 @@ const TrainingPage: React.FC = () => {
             icon: Target,
             color: athleticTechTheme.colors.primary.field,
             gradient: athleticTechTheme.gradients.endurance,
-            onClick: () => alert('Goal setting feature coming soon!')
+            onClick: () => setShowGoalSetting(true)
           },
           {
             title: 'Track Progress',
@@ -231,7 +239,7 @@ const TrainingPage: React.FC = () => {
             icon: TrendingUp,
             color: athleticTechTheme.colors.primary.tech,
             gradient: athleticTechTheme.gradients.tech,
-            onClick: () => alert('Progress tracking feature coming soon!')
+            onClick: () => setShowProgressTracking(true)
           }
         ];
       default:
@@ -501,6 +509,41 @@ const TrainingPage: React.FC = () => {
       {showAthleteProgress && (
         <AthleteProgressModal
           onClose={() => setShowAthleteProgress(false)}
+        />
+      )}
+      
+      {showUploadVideo && (
+        <UploadVideoModal
+          onUpload={(videoData) => {
+            console.log('Video uploaded:', videoData);
+            setShowUploadVideo(false);
+            // This would trigger coach recent activity update
+            alert(`Video "${videoData.title}" uploaded successfully! Your coach will review it soon.`);
+          }}
+          onClose={() => setShowUploadVideo(false)}
+        />
+      )}
+      
+      {showTrainingHistory && (
+        <TrainingHistoryModal
+          onClose={() => setShowTrainingHistory(false)}
+        />
+      )}
+      
+      {showGoalSetting && (
+        <GoalSettingModal
+          onSaveGoals={(goals) => {
+            console.log('Goals saved:', goals);
+            setShowGoalSetting(false);
+            alert(`${goals.length} goals saved successfully!`);
+          }}
+          onClose={() => setShowGoalSetting(false)}
+        />
+      )}
+      
+      {showProgressTracking && (
+        <ProgressTrackingModal
+          onClose={() => setShowProgressTracking(false)}
         />
       )}
     </div>
