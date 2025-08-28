@@ -49,11 +49,14 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
     setData(prev => ({ ...prev, ...updates }));
   };
   
-  // Prevent form submission on Enter key
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-    }
+  // Stable input handlers to prevent re-renders
+  const handleInputChange = (field: keyof OnboardingData) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setData(prev => ({ ...prev, [field]: value }));
+  };
+  
+  const handleSelectChange = (field: keyof OnboardingData) => (value: string) => {
+    setData(prev => ({ ...prev, [field]: value }));
   };
 
   const nextStep = () => setStep(prev => Math.min(prev + 1, totalSteps));
@@ -81,9 +84,8 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
           <Input
             id="fullName"
             value={data.fullName}
-            onChange={(e) => updateData({ fullName: e.target.value })}
+            onChange={handleInputChange('fullName')}
             placeholder="Enter your full name"
-            onKeyDown={(e) => e.stopPropagation()}
           />
         </div>
 
@@ -93,9 +95,8 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
             id="email"
             type="email"
             value={data.email}
-            onChange={(e) => updateData({ email: e.target.value })}
+            onChange={handleInputChange('email')}
             placeholder="your.email@example.com"
-            onKeyDown={(e) => e.stopPropagation()}
           />
         </div>
 
@@ -105,9 +106,8 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
             id="password"
             type="password"
             value={data.password}
-            onChange={(e) => updateData({ password: e.target.value })}
+            onChange={handleInputChange('password')}
             placeholder="Create a secure password"
-            onKeyDown={(e) => e.stopPropagation()}
           />
         </div>
         
@@ -118,7 +118,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
               id="coachCode"
               type="text"
               value={data.coachCode || ''}
-              onChange={(e) => updateData({ coachCode: e.target.value.toUpperCase() })}
+              onChange={(e) => setData(prev => ({ ...prev, coachCode: e.target.value.toUpperCase() }))}
               placeholder="Enter your coach's code (e.g., COACH123)"
               maxLength={10}
             />
@@ -185,7 +185,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
                 id="age"
                 type="number"
                 value={data.age || ''}
-                onChange={(e) => updateData({ age: parseInt(e.target.value) || undefined })}
+                onChange={(e) => setData(prev => ({ ...prev, age: parseInt(e.target.value) || undefined }))}
                 placeholder="18"
               />
             </div>
@@ -195,7 +195,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
                 id="experience"
                 type="number"
                 value={data.yearsExperience || ''}
-                onChange={(e) => updateData({ yearsExperience: parseInt(e.target.value) || undefined })}
+                onChange={(e) => setData(prev => ({ ...prev, yearsExperience: parseInt(e.target.value) || undefined }))}
                 placeholder="5"
               />
             </div>
@@ -223,7 +223,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
                 id="yearsCoaching"
                 type="number"
                 value={data.yearsCoaching || ''}
-                onChange={(e) => updateData({ yearsCoaching: parseInt(e.target.value) || undefined })}
+                onChange={(e) => setData(prev => ({ ...prev, yearsCoaching: parseInt(e.target.value) || undefined }))}
                 placeholder="5"
               />
             </div>
@@ -349,7 +349,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
                 id="goals"
                 placeholder="What are your main training goals? (e.g., qualify for nationals, improve 100m time, etc.)"
                 value={data.trainingGoals || ''}
-                onChange={(e) => updateData({ trainingGoals: e.target.value })}
+                onChange={handleInputChange('trainingGoals')}
                 rows={3}
               />
             </div>
@@ -361,7 +361,7 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
               id="philosophy"
               placeholder="Describe your coaching philosophy and approach to training athletes..."
               value={data.coachingPhilosophy || ''}
-              onChange={(e) => updateData({ coachingPhilosophy: e.target.value })}
+              onChange={handleInputChange('coachingPhilosophy')}
               rows={4}
             />
           </div>
@@ -433,31 +433,29 @@ const SimpleOnboarding: React.FC<SimpleOnboardingProps> = ({ onComplete, onBack 
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={(e) => { e.preventDefault(); step === 5 ? handleComplete() : nextStep(); }} onKeyDown={handleKeyDown}>
-            {renderStep()}
+          {renderStep()}
 
-            <div className="flex justify-end mt-8">
-              {step === 5 ? (
-                <Button 
-                  type="submit"
-                  style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
-                  disabled={!data.fullName || !data.email || !data.password}
-                >
-                  Complete Setup
-                  <Trophy className="h-4 w-4 ml-2" />
-                </Button>
-              ) : (
-                <Button 
-                  type="submit"
-                  style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
-                  disabled={step === 1 && (!data.fullName || !data.email || !data.password)}
-                >
-                  Continue
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              )}
-            </div>
-          </form>
+          <div className="flex justify-end mt-8">
+            {step === 5 ? (
+              <Button 
+                onClick={handleComplete}
+                style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
+                disabled={!data.fullName || !data.email || !data.password}
+              >
+                Complete Setup
+                <Trophy className="h-4 w-4 ml-2" />
+              </Button>
+            ) : (
+              <Button 
+                onClick={nextStep}
+                style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
+                disabled={step === 1 && (!data.fullName || !data.email || !data.password)}
+              >
+                Continue
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
