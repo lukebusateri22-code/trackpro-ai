@@ -4,6 +4,9 @@ import Navigation from '@/components/Navigation';
 import PageLayout from '@/components/layout/PageLayout';
 import ActionCard from '@/components/ui/ActionCard';
 import WorkoutCreator from '@/components/workout/WorkoutCreator';
+import WorkoutCompletionModal from '@/components/training/WorkoutCompletionModal';
+import WorkoutLibrary from '@/components/training/WorkoutLibrary';
+import { WORKOUT_TEMPLATES } from '@/lib/workoutLibrary';
 import { useUser } from '@/contexts/UserContext';
 import { useAuth } from '@/components/auth/AuthProvider';
 import athleticTechTheme from '@/lib/athleticTechTheme';
@@ -30,7 +33,45 @@ const TrainingPage: React.FC = () => {
   const { user, isCoach } = useUser();
   const { profile } = useAuth();
   const [showWorkoutCreator, setShowWorkoutCreator] = useState(false);
+  const [showWorkoutCompletion, setShowWorkoutCompletion] = useState(false);
+  const [showWorkoutLibrary, setShowWorkoutLibrary] = useState(false);
+  const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
   const [activeView, setActiveView] = useState('dashboard');
+  
+  // Mock workout data for demonstration
+  const mockAssignedWorkout = {
+    id: 'workout_1',
+    name: 'Sprint Power Development',
+    description: 'High-intensity sprint training with plyometric exercises',
+    exercises: [
+      {
+        id: 'ex1',
+        name: '100m Sprint Intervals',
+        sets: 6,
+        duration: '100m',
+        restPeriod: 180,
+        instructions: 'Sprint at 95% effort, focus on form'
+      },
+      {
+        id: 'ex2',
+        name: 'Box Jumps',
+        sets: 4,
+        reps: 8,
+        restPeriod: 90,
+        instructions: 'Explosive takeoff, soft landing'
+      },
+      {
+        id: 'ex3',
+        name: 'Depth Jumps',
+        sets: 3,
+        reps: 5,
+        restPeriod: 120,
+        instructions: 'Step off box, land and immediately jump up'
+      }
+    ],
+    estimatedDuration: 90,
+    difficulty: 'hard' as const
+  };
   
   // Get onboarding data to check if athlete has coach
   const onboardingData = JSON.parse(localStorage.getItem('onboardingData') || '{}');
@@ -91,7 +132,7 @@ const TrainingPage: React.FC = () => {
             icon: Users,
             color: athleticTechTheme.colors.primary.power,
             gradient: athleticTechTheme.gradients.power,
-            onClick: () => setActiveView('assign')
+            onClick: () => alert('Athlete assignment feature coming soon!')
           },
           {
             title: 'Athlete Progress',
@@ -99,7 +140,7 @@ const TrainingPage: React.FC = () => {
             icon: BarChart3,
             color: athleticTechTheme.colors.primary.field,
             gradient: athleticTechTheme.gradients.endurance,
-            onClick: () => setActiveView('progress')
+            onClick: () => alert('Athlete progress monitoring coming soon!')
           },
           {
             title: 'Training Library',
@@ -107,7 +148,7 @@ const TrainingPage: React.FC = () => {
             icon: Library,
             color: athleticTechTheme.colors.primary.tech,
             gradient: athleticTechTheme.gradients.tech,
-            onClick: () => setActiveView('library')
+            onClick: () => setShowWorkoutLibrary(true)
           }
         ];
       case 'athlete_with_coach':
@@ -118,7 +159,10 @@ const TrainingPage: React.FC = () => {
             icon: Play,
             color: athleticTechTheme.colors.primary.track,
             gradient: athleticTechTheme.gradients.speed,
-            onClick: () => setActiveView('today')
+            onClick: () => {
+              setSelectedWorkout(mockAssignedWorkout);
+              setShowWorkoutCompletion(true);
+            }
           },
           {
             title: 'Complete Workout',
@@ -126,7 +170,10 @@ const TrainingPage: React.FC = () => {
             icon: CheckCircle,
             color: athleticTechTheme.colors.performance.excellent,
             gradient: athleticTechTheme.gradients.power,
-            onClick: () => setActiveView('complete')
+            onClick: () => {
+              setSelectedWorkout(mockAssignedWorkout);
+              setShowWorkoutCompletion(true);
+            }
           },
           {
             title: 'Upload Video',
@@ -134,7 +181,7 @@ const TrainingPage: React.FC = () => {
             icon: Camera,
             color: athleticTechTheme.colors.primary.power,
             gradient: athleticTechTheme.gradients.endurance,
-            onClick: () => setActiveView('video')
+            onClick: () => alert('Video upload feature coming soon!')
           },
           {
             title: 'Training History',
@@ -142,7 +189,7 @@ const TrainingPage: React.FC = () => {
             icon: Award,
             color: athleticTechTheme.colors.primary.field,
             gradient: athleticTechTheme.gradients.tech,
-            onClick: () => setActiveView('history')
+            onClick: () => alert('Training history feature coming soon!')
           }
         ];
       case 'athlete_without_coach':
@@ -153,7 +200,7 @@ const TrainingPage: React.FC = () => {
             icon: Search,
             color: athleticTechTheme.colors.primary.track,
             gradient: athleticTechTheme.gradients.speed,
-            onClick: () => setActiveView('browse')
+            onClick: () => setShowWorkoutLibrary(true)
           },
           {
             title: 'Create Custom Workout',
@@ -169,7 +216,7 @@ const TrainingPage: React.FC = () => {
             icon: Target,
             color: athleticTechTheme.colors.primary.field,
             gradient: athleticTechTheme.gradients.endurance,
-            onClick: () => setActiveView('goals')
+            onClick: () => alert('Goal setting feature coming soon!')
           },
           {
             title: 'Track Progress',
@@ -177,7 +224,7 @@ const TrainingPage: React.FC = () => {
             icon: TrendingUp,
             color: athleticTechTheme.colors.primary.tech,
             gradient: athleticTechTheme.gradients.tech,
-            onClick: () => setActiveView('progress')
+            onClick: () => alert('Progress tracking feature coming soon!')
           }
         ];
       default:
@@ -354,6 +401,34 @@ const TrainingPage: React.FC = () => {
         </PageLayout>
       </div>
       <Navigation activeTab="training" />
+      
+      {/* Modals */}
+      {showWorkoutCompletion && selectedWorkout && (
+        <WorkoutCompletionModal
+          workout={selectedWorkout}
+          onClose={() => {
+            setShowWorkoutCompletion(false);
+            setSelectedWorkout(null);
+          }}
+          onComplete={(completionData) => {
+            console.log('Workout completed:', completionData);
+            setShowWorkoutCompletion(false);
+            setSelectedWorkout(null);
+            alert('Workout completed successfully! 🎉');
+          }}
+        />
+      )}
+      
+      {showWorkoutLibrary && (
+        <WorkoutLibrary
+          onSelectWorkout={(workout) => {
+            setSelectedWorkout(workout);
+            setShowWorkoutLibrary(false);
+            setShowWorkoutCompletion(true);
+          }}
+          onClose={() => setShowWorkoutLibrary(false)}
+        />
+      )}
     </div>
   );
 };

@@ -17,7 +17,7 @@ import { GoalsProvider } from '@/contexts/GoalsContext';
 import { AppProvider } from '@/contexts/AppContext';
 import { AuthProvider, useAuth } from '@/components/auth/AuthProvider';
 import AuthModal from '@/components/auth/AuthModal';
-import SimpleOnboarding from '@/components/auth/SimpleOnboarding';
+import FixedOnboarding from "./components/auth/FixedOnboarding";
 import LoadingScreen from '@/components/ui/LoadingScreen';
 import { Button } from '@/components/ui/button';
 import { LogOut, User } from 'lucide-react';
@@ -37,7 +37,7 @@ const AppRoutes: React.FC = () => {
   // Show onboarding flow
   if (showOnboarding) {
     return (
-      <SimpleOnboarding 
+      <FixedOnboarding 
         onComplete={async (data) => {
           // Store additional onboarding data in localStorage for now
           // TODO: Extend database schema to support these fields
