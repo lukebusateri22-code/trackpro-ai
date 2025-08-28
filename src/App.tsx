@@ -17,6 +17,7 @@ import { GoalsProvider } from '@/contexts/GoalsContext';
 import { AppProvider } from '@/contexts/AppContext';
 import { AuthProvider, useAuth } from '@/components/auth/AuthProvider';
 import AuthModal from '@/components/auth/AuthModal';
+import SimpleOnboarding from '@/components/auth/SimpleOnboarding';
 import LoadingScreen from '@/components/ui/LoadingScreen';
 import { Button } from '@/components/ui/button';
 import { LogOut, User } from 'lucide-react';
@@ -24,12 +25,39 @@ import athleticTechTheme from '@/lib/athleticTechTheme';
 
 // Main App Routes Component
 const AppRoutes: React.FC = () => {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, signOut, signUp } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Show loading screen while checking authentication
   if (loading) {
     return <LoadingScreen message="Initializing TrackPro AI..." />;
+  }
+
+  // Show onboarding flow
+  if (showOnboarding) {
+    return (
+      <SimpleOnboarding 
+        onComplete={async (data) => {
+          const { error } = await signUp(data.email, data.password, {
+            full_name: data.fullName,
+            role: data.role,
+            username: data.email.split('@')[0]
+          });
+          
+          if (error) {
+            console.error('Registration error:', error);
+            // Handle error - maybe show error message
+          } else {
+            setShowOnboarding(false);
+          }
+        }}
+        onBack={() => {
+          setShowOnboarding(false);
+          setShowAuthModal(true);
+        }}
+      />
+    );
   }
 
   // Show auth modal for unauthenticated users
@@ -54,7 +82,11 @@ const AppRoutes: React.FC = () => {
             </Button>
           </div>
         </div>
-        <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
+        <AuthModal 
+          open={showAuthModal} 
+          onOpenChange={setShowAuthModal}
+          onStartOnboarding={() => setShowOnboarding(true)}
+        />
       </>
     );
   }
