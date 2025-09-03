@@ -5,6 +5,9 @@ export interface UserProfile {
   id: string;
   username: string;
   age: number;
+  height?: string;
+  weight?: string;
+  experience?: string;
   primaryEvents: string[];
   experienceLevels: { [event: string]: 'Beginner' | 'Intermediate' | 'Advanced' | 'Pro' };
   personalRecords: { [event: string]: { value: number; date: string; location?: string } };
@@ -29,6 +32,9 @@ const defaultUser: UserProfile = {
   id: 'demo-user',
   username: 'Demo Athlete',
   age: 22,
+  height: '5\'10"',
+  weight: '165 lbs',
+  experience: 'Intermediate',
   primaryEvents: ['100m', 'Long Jump'],
   experienceLevels: {
     '100m': 'Intermediate',

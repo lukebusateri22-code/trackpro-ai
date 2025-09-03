@@ -227,7 +227,7 @@ const TrainingScreen: React.FC = () => {
           <div className="flex items-center space-x-3">
             <Target 
               size={24} 
-              style={{ color: athleticTechTheme.colors.primary.electric }}
+              style={{ color: athleticTechTheme.colors.primary.track }}
             />
             <div>
               <p 
@@ -281,39 +281,188 @@ const TrainingScreen: React.FC = () => {
   const renderAthleteView = () => (
     <div className="space-y-6">
       {/* Athlete Header */}
-      <div>
-        <h2 
-          className="text-2xl font-bold mb-2"
+      <div className="text-center">
+        <h1 
+          className="text-3xl font-bold mb-2"
           style={{ color: athleticTechTheme.colors.text.primary }}
         >
-          My Training
-        </h2>
+          Your Training
+        </h1>
         <p 
-          className="text-sm"
+          className="text-lg"
           style={{ color: athleticTechTheme.colors.text.secondary }}
         >
-          Track your progress and complete assigned workouts
+          Track your progress and complete your workouts
         </p>
       </div>
-
-      {/* Today's Sessions */}
-      <div>
-        <h3 
-          className="text-lg font-semibold mb-4"
-          style={{ color: athleticTechTheme.colors.text.primary }}
+      
+      {/* Quick Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <div
+          className="p-4 rounded-xl text-center"
+          style={{
+            backgroundColor: athleticTechTheme.colors.surface.elevated,
+            border: `1px solid ${athleticTechTheme.colors.interactive.border}`
+          }}
         >
-          Today's Training
-        </h3>
-        <div className="grid gap-4">
-          {mockSessions.map(session => (
-            <WorkoutSessionCard
+          <Calendar 
+            size={24} 
+            style={{ color: athleticTechTheme.colors.primary.track }}
+            className="mx-auto mb-2"
+          />
+          <p 
+            className="text-xl font-bold"
+            style={{ color: athleticTechTheme.colors.text.primary }}
+          >
+            {mockSessions.filter(s => !s.completed).length}
+          </p>
+          <p 
+            className="text-xs"
+            style={{ color: athleticTechTheme.colors.text.secondary }}
+          >
+            Pending
+          </p>
+        </div>
+        
+        <div
+          className="p-4 rounded-xl text-center"
+          style={{
+            backgroundColor: athleticTechTheme.colors.surface.elevated,
+            border: `1px solid ${athleticTechTheme.colors.interactive.border}`
+          }}
+        >
+          <Target 
+            size={24} 
+            style={{ color: athleticTechTheme.colors.performance.excellent }}
+            className="mx-auto mb-2"
+          />
+          <p 
+            className="text-xl font-bold"
+            style={{ color: athleticTechTheme.colors.text.primary }}
+          >
+            {mockSessions.filter(s => s.completed).length}
+          </p>
+          <p 
+            className="text-xs"
+            style={{ color: athleticTechTheme.colors.text.secondary }}
+          >
+            Completed
+          </p>
+        </div>
+        
+        <div
+          className="p-4 rounded-xl text-center"
+          style={{
+            backgroundColor: athleticTechTheme.colors.surface.elevated,
+            border: `1px solid ${athleticTechTheme.colors.interactive.border}`
+          }}
+        >
+          <TrendingUp 
+            size={24} 
+            style={{ color: athleticTechTheme.colors.events.jumps }}
+            className="mx-auto mb-2"
+          />
+          <p 
+            className="text-xl font-bold"
+            style={{ color: athleticTechTheme.colors.text.primary }}
+          >
+            85%
+          </p>
+          <p 
+            className="text-xs"
+            style={{ color: athleticTechTheme.colors.text.secondary }}
+          >
+            Completion
+          </p>
+        </div>
+      </div>
+      
+      {/* Recent Workouts Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 
+            className="text-xl font-bold"
+            style={{ color: athleticTechTheme.colors.text.primary }}
+          >
+            Recent Workouts
+          </h2>
+          <button 
+            className="text-sm font-medium hover:underline"
+            style={{ color: athleticTechTheme.colors.primary.track }}
+          >
+            View All
+          </button>
+        </div>
+        
+        <div className="grid gap-3">
+          {mockSessions.slice(0, 3).map(session => (
+            <div
               key={session.id}
-              session={session}
-              isCoach={false}
-              onComplete={handleCompleteSession}
-              onUploadVideo={handleUploadVideo}
-              onAddNotes={handleAddNotes}
-            />
+              className="p-4 rounded-lg border transition-all duration-200 hover:scale-[1.01]"
+              style={{
+                backgroundColor: session.completed 
+                  ? athleticTechTheme.colors.surface.elevated 
+                  : athleticTechTheme.colors.surface.secondary,
+                borderColor: session.completed 
+                  ? athleticTechTheme.colors.performance.completed 
+                  : athleticTechTheme.colors.interactive.border
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div
+                    className="p-2 rounded-full"
+                    style={{
+                      backgroundColor: session.completed 
+                        ? `${athleticTechTheme.colors.performance.excellent}20`
+                        : `${athleticTechTheme.colors.primary.track}20`,
+                      color: session.completed 
+                        ? athleticTechTheme.colors.performance.excellent
+                        : athleticTechTheme.colors.primary.track
+                    }}
+                  >
+                    {session.completed ? <Target size={16} /> : <Calendar size={16} />}
+                  </div>
+                  <div>
+                    <h3 
+                      className="font-medium"
+                      style={{ color: athleticTechTheme.colors.text.primary }}
+                    >
+                      {session.name}
+                    </h3>
+                    <p 
+                      className="text-sm"
+                      style={{ color: athleticTechTheme.colors.text.secondary }}
+                    >
+                      {session.type} • {session.duration} min
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  {session.completed ? (
+                    <span 
+                      className="text-xs font-medium px-2 py-1 rounded-full"
+                      style={{
+                        backgroundColor: `${athleticTechTheme.colors.performance.excellent}20`,
+                        color: athleticTechTheme.colors.performance.excellent
+                      }}
+                    >
+                      Completed
+                    </span>
+                  ) : (
+                    <span 
+                      className="text-xs font-medium px-2 py-1 rounded-full"
+                      style={{
+                        backgroundColor: `${athleticTechTheme.colors.events.jumps}20`,
+                        color: athleticTechTheme.colors.events.jumps
+                      }}
+                    >
+                      Pending
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -402,7 +551,7 @@ const TrainingScreen: React.FC = () => {
               }`}
               style={{
                 backgroundColor: isActive 
-                  ? athleticTechTheme.colors.primary.electric 
+                  ? athleticTechTheme.colors.primary.track 
                   : 'transparent',
                 color: isActive 
                   ? athleticTechTheme.colors.text.primary 

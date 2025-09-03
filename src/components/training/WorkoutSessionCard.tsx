@@ -28,6 +28,29 @@ const WorkoutSessionCard: React.FC<WorkoutSessionCardProps> = ({
   onUploadVideo,
   onAddNotes
 }) => {
+  const handleUploadVideo = (sessionId: string) => {
+    // Create file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'video/*';
+    input.multiple = true;
+    
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (files && files.length > 0) {
+        // In a real app, you would upload these files to your server
+        console.log('Selected files:', Array.from(files).map(f => f.name));
+        alert(`Selected ${files.length} video file(s) for upload. Upload functionality will be implemented with backend integration.`);
+        
+        // Call the parent callback if provided
+        if (onUploadVideo) {
+          onUploadVideo(sessionId);
+        }
+      }
+    };
+    
+    input.click();
+  };
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'track': return <Activity size={20} />;
@@ -250,13 +273,14 @@ const WorkoutSessionCard: React.FC<WorkoutSessionCardProps> = ({
       )}
 
       {/* Action Buttons */}
-      <div className="flex space-x-2">
+      <div className="flex flex-wrap gap-2 mt-4">
         {!session.completed && !isCoach && onComplete && (
           <button
-            className="flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 flex items-center justify-center space-x-2"
+            className="flex-1 min-w-[120px] py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 flex items-center justify-center space-x-2"
             style={{
               backgroundColor: athleticTechTheme.colors.performance.excellent,
-              color: athleticTechTheme.colors.text.primary
+              color: athleticTechTheme.colors.text.inverse,
+              boxShadow: athleticTechTheme.shadows.md
             }}
             onClick={() => onComplete(session.id)}
           >
@@ -267,13 +291,14 @@ const WorkoutSessionCard: React.FC<WorkoutSessionCardProps> = ({
         
         {onUploadVideo && (
           <button
-            className="py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 flex items-center space-x-2 border"
+            className="flex-1 min-w-[120px] py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 flex items-center justify-center space-x-2 border"
             style={{
-              backgroundColor: 'transparent',
+              backgroundColor: athleticTechTheme.colors.surface.secondary,
               borderColor: athleticTechTheme.colors.primary.field,
-              color: athleticTechTheme.colors.primary.field
+              color: athleticTechTheme.colors.primary.field,
+              boxShadow: athleticTechTheme.shadows.sm
             }}
-            onClick={() => onUploadVideo(session.id)}
+            onClick={() => handleUploadVideo(session.id)}
           >
             <Upload size={16} />
             <span>Upload Video</span>
@@ -282,11 +307,12 @@ const WorkoutSessionCard: React.FC<WorkoutSessionCardProps> = ({
         
         {onAddNotes && (
           <button
-            className="py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 flex items-center space-x-2 border"
+            className="flex-1 min-w-[100px] py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 flex items-center justify-center space-x-2 border"
             style={{
-              backgroundColor: 'transparent',
-              borderColor: athleticTechTheme.colors.text.muted,
-              color: athleticTechTheme.colors.text.muted
+              backgroundColor: athleticTechTheme.colors.surface.secondary,
+              borderColor: athleticTechTheme.colors.interactive.border,
+              color: athleticTechTheme.colors.text.secondary,
+              boxShadow: athleticTechTheme.shadows.sm
             }}
             onClick={() => {
               const notes = prompt(isCoach ? 'Add coach notes:' : 'Add athlete notes:');

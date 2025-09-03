@@ -27,13 +27,20 @@ const HomeScreen: React.FC = () => {
 
   const mainActions = [
     {
-      id: 'training-plan',
-      title: isCoach ? 'Create Training Plan' : 'View Training Plans',
-      description: isCoach ? 'Design workouts for your athletes' : 'See your assigned training programs',
+      id: 'daily-workouts',
+      title: isCoach ? 'Create Training Plan' : 'Workouts for the Day',
+      description: isCoach ? 'Design workouts for your athletes' : 'View today\'s scheduled training sessions',
       icon: Calendar,
       color: athleticTechTheme.colors.primary.track,
       gradient: athleticTechTheme.gradients.speed,
-      onClick: () => setShowTrainingPlan(true)
+      onClick: () => {
+        if (isCoach) {
+          setShowTrainingPlan(true);
+        } else {
+          // Navigate to training page for athletes
+          window.location.href = '/training';
+        }
+      }
     },
     {
       id: 'video-analysis',
@@ -44,15 +51,15 @@ const HomeScreen: React.FC = () => {
       gradient: athleticTechTheme.gradients.power,
       onClick: () => setShowVideoAnalysis(true)
     },
-    {
+    ...(isCoach ? [{
       id: 'analytics',
       title: 'Analytics',
-      description: isCoach ? 'Track athlete progress and metrics' : 'View your performance analytics',
+      description: 'Track athlete progress and metrics',
       icon: BarChart3,
       color: athleticTechTheme.colors.primary.field,
       gradient: athleticTechTheme.gradients.endurance,
       onClick: () => setShowAnalytics(true)
-    },
+    }] : []),
     {
       id: 'ai-coach',
       title: 'AI Coach',
@@ -85,8 +92,8 @@ const HomeScreen: React.FC = () => {
         </p>
       </div>
 
-      {/* Quick Stats */}
-      {isCoach && (
+      {/* Quick Stats - Show for both coaches and athletes but different content */}
+      {isCoach ? (
         <div className="grid grid-cols-3 gap-4">
           <div
             className="p-4 rounded-xl text-center"
@@ -166,10 +173,8 @@ const HomeScreen: React.FC = () => {
             </p>
           </div>
         </div>
-      )}
-
-      {/* Athlete Quick Stats */}
-      {!isCoach && (
+      ) : (
+        // Athlete stats - Today's workouts
         <div className="grid grid-cols-3 gap-4">
           <div
             className="p-4 rounded-xl text-center"
@@ -178,9 +183,9 @@ const HomeScreen: React.FC = () => {
               border: `1px solid ${athleticTechTheme.colors.interactive.border}`
             }}
           >
-            <Zap 
+            <Calendar 
               size={24} 
-              style={{ color: athleticTechTheme.colors.events.sprints }}
+              style={{ color: athleticTechTheme.colors.primary.track }}
               className="mx-auto mb-2"
             />
             <p 
@@ -193,7 +198,7 @@ const HomeScreen: React.FC = () => {
               className="text-xs"
               style={{ color: athleticTechTheme.colors.text.secondary }}
             >
-              This Week
+              Today's Workouts
             </p>
           </div>
           
@@ -239,13 +244,13 @@ const HomeScreen: React.FC = () => {
               className="text-xl font-bold"
               style={{ color: athleticTechTheme.colors.text.primary }}
             >
-              +2.1%
+              85%
             </p>
             <p 
               className="text-xs"
               style={{ color: athleticTechTheme.colors.text.secondary }}
             >
-              Improvement
+              Recovery Score
             </p>
           </div>
         </div>

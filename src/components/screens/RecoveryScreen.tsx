@@ -4,15 +4,37 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useUser } from '@/contexts/UserContext';
 import { 
   Heart, Battery, Moon, Droplets, Brain, Activity, 
   TrendingUp, AlertCircle, Zap, Target, Clock, Award,
-  Thermometer, Wind, Sun, CloudRain
+  Thermometer, Wind, Sun, CloudRain, Save, Plus
 } from 'lucide-react';
 import athleticTechTheme from '@/lib/athleticTechTheme';
 
 const RecoveryScreen: React.FC = () => {
+  const { isCoach, isAthlete } = useUser();
   const [selectedPeriod, setSelectedPeriod] = useState('today');
+  const [showMentalHealthDialog, setShowMentalHealthDialog] = useState(false);
+  const [showSleepDialog, setShowSleepDialog] = useState(false);
+  const [mentalHealthData, setMentalHealthData] = useState({
+    mood: 5,
+    stress: 3,
+    anxiety: 2,
+    motivation: 7,
+    notes: ''
+  });
+  const [sleepData, setSleepData] = useState({
+    bedTime: '22:00',
+    wakeTime: '07:00',
+    quality: 7,
+    duration: 9,
+    notes: ''
+  });
 
   // Mock recovery data - in real app, this would come from context/API
   const recoveryScore = 7.8;
@@ -90,6 +112,36 @@ const RecoveryScreen: React.FC = () => {
       case 'good': return athleticTechTheme.colors.performance.excellent;
       default: return athleticTechTheme.colors.text.secondary;
     }
+  };
+
+  const handleSaveMentalHealth = () => {
+    // In a real app, this would save to your backend
+    console.log('Saving mental health data:', mentalHealthData);
+    alert('Mental health check-in saved successfully!');
+    setShowMentalHealthDialog(false);
+    // Reset form
+    setMentalHealthData({
+      mood: 5,
+      stress: 3,
+      anxiety: 2,
+      motivation: 7,
+      notes: ''
+    });
+  };
+
+  const handleSaveSleep = () => {
+    // In a real app, this would save to your backend
+    console.log('Saving sleep data:', sleepData);
+    alert('Sleep log saved successfully!');
+    setShowSleepDialog(false);
+    // Reset form
+    setSleepData({
+      bedTime: '22:00',
+      wakeTime: '07:00',
+      quality: 7,
+      duration: 9,
+      notes: ''
+    });
   };
 
   return (
@@ -185,6 +237,37 @@ const RecoveryScreen: React.FC = () => {
 
           {/* Wellness Metrics Tab */}
           <TabsContent value="metrics" className="space-y-6">
+            {/* Quick Action Buttons */}
+            <div className="flex flex-wrap gap-3 mb-6">
+              {isAthlete && (
+                <Button
+                  onClick={() => setShowMentalHealthDialog(true)}
+                  className="flex items-center space-x-2"
+                  style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
+                >
+                  <Brain size={16} />
+                  <span>Mental Health Check-in</span>
+                </Button>
+              )}
+              
+              <Button
+                onClick={() => setShowSleepDialog(true)}
+                className="flex items-center space-x-2"
+                style={{ backgroundColor: athleticTechTheme.colors.primary.field }}
+              >
+                <Moon size={16} />
+                <span>Log Sleep</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="flex items-center space-x-2"
+                style={{ borderColor: athleticTechTheme.colors.primary.power, color: athleticTechTheme.colors.primary.power }}
+              >
+                <Plus size={16} />
+                <span>Log Injury</span>
+              </Button>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {Object.entries(todaysMetrics).map(([key, value]) => {
                 const icons: { [key: string]: any } = {
@@ -441,6 +524,197 @@ const RecoveryScreen: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Mental Health Check-in Dialog - Athletes Only */}
+      {isAthlete && (
+        <Dialog open={showMentalHealthDialog} onOpenChange={setShowMentalHealthDialog}>
+          <DialogContent className="max-w-md" style={{ backgroundColor: athleticTechTheme.colors.surface.secondary }}>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                <Brain className="h-5 w-5" style={{ color: athleticTechTheme.colors.primary.track }} />
+                Mental Health Check-in
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="mood">Mood (1-10)</Label>
+                <Input
+                  id="mood"
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={mentalHealthData.mood}
+                  onChange={(e) => setMentalHealthData(prev => ({ ...prev, mood: parseInt(e.target.value) }))}
+                  style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="stress">Stress Level (1-10)</Label>
+                <Input
+                  id="stress"
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={mentalHealthData.stress}
+                  onChange={(e) => setMentalHealthData(prev => ({ ...prev, stress: parseInt(e.target.value) }))}
+                  style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="anxiety">Anxiety Level (1-10)</Label>
+                <Input
+                  id="anxiety"
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={mentalHealthData.anxiety}
+                  onChange={(e) => setMentalHealthData(prev => ({ ...prev, anxiety: parseInt(e.target.value) }))}
+                  style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="motivation">Motivation (1-10)</Label>
+                <Input
+                  id="motivation"
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={mentalHealthData.motivation}
+                  onChange={(e) => setMentalHealthData(prev => ({ ...prev, motivation: parseInt(e.target.value) }))}
+                  style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="mental-notes">Additional Notes</Label>
+                <Textarea
+                  id="mental-notes"
+                  placeholder="How are you feeling today? Any specific thoughts or concerns?"
+                  value={mentalHealthData.notes}
+                  onChange={(e) => setMentalHealthData(prev => ({ ...prev, notes: e.target.value }))}
+                  style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}
+                />
+              </div>
+              
+              <div className="flex space-x-2 pt-4">
+                <Button
+                  onClick={handleSaveMentalHealth}
+                  className="flex-1 flex items-center justify-center space-x-2"
+                  style={{ backgroundColor: athleticTechTheme.colors.performance.excellent }}
+                >
+                  <Save size={16} />
+                  <span>Save Check-in</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowMentalHealthDialog(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+      
+      {/* Sleep Log Dialog */}
+      <Dialog open={showSleepDialog} onOpenChange={setShowSleepDialog}>
+        <DialogContent className="max-w-md" style={{ backgroundColor: athleticTechTheme.colors.surface.secondary }}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+              <Moon className="h-5 w-5" style={{ color: athleticTechTheme.colors.primary.track }} />
+              Sleep Log
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="bedtime">Bed Time</Label>
+                <Input
+                  id="bedtime"
+                  type="time"
+                  value={sleepData.bedTime}
+                  onChange={(e) => setSleepData(prev => ({ ...prev, bedTime: e.target.value }))}
+                  style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="waketime">Wake Time</Label>
+                <Input
+                  id="waketime"
+                  type="time"
+                  value={sleepData.wakeTime}
+                  onChange={(e) => setSleepData(prev => ({ ...prev, wakeTime: e.target.value }))}
+                  style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="sleep-quality">Sleep Quality (1-10)</Label>
+              <Input
+                id="sleep-quality"
+                type="number"
+                min="1"
+                max="10"
+                value={sleepData.quality}
+                onChange={(e) => setSleepData(prev => ({ ...prev, quality: parseInt(e.target.value) }))}
+                style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="sleep-duration">Duration (hours)</Label>
+              <Input
+                id="sleep-duration"
+                type="number"
+                min="1"
+                max="12"
+                step="0.5"
+                value={sleepData.duration}
+                onChange={(e) => setSleepData(prev => ({ ...prev, duration: parseFloat(e.target.value) }))}
+                style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="sleep-notes">Sleep Notes</Label>
+              <Textarea
+                id="sleep-notes"
+                placeholder="How did you sleep? Any factors that affected your sleep?"
+                value={sleepData.notes}
+                onChange={(e) => setSleepData(prev => ({ ...prev, notes: e.target.value }))}
+                style={{ backgroundColor: athleticTechTheme.colors.surface.primary }}
+              />
+            </div>
+            
+            <div className="flex space-x-2 pt-4">
+              <Button
+                onClick={handleSaveSleep}
+                className="flex-1 flex items-center justify-center space-x-2"
+                style={{ backgroundColor: athleticTechTheme.colors.performance.excellent }}
+              >
+                <Save size={16} />
+                <span>Save Sleep Log</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowSleepDialog(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
