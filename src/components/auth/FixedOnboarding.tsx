@@ -3,27 +3,28 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, ArrowRight, Trophy, User, Shield } from 'lucide-react';
+import { ArrowLeft, ArrowRight, User, Trophy, Target, CheckCircle } from 'lucide-react';
 import athleticTechTheme from '@/lib/athleticTechTheme';
 
-interface OnboardingData {
+export interface OnboardingData {
   fullName: string;
   email: string;
   password: string;
+  username: string;
   role: 'athlete' | 'coach';
+  experienceLevel: string;
+  primaryEvents: string[];
+  personalRecords: { [key: string]: string };
+  trainingGoals: string;
   coachCode?: string;
-  age?: number;
-  yearsExperience?: number;
-  primaryEvents?: string[];
-  personalRecords?: { [key: string]: string };
-  trainingGoals?: string;
-  coachingLevel?: string;
-  yearsCoaching?: number;
-  specialtyEvents?: string[];
-  coachingPhilosophy?: string;
+  hasCoach: boolean;
+  specialtyEvents: string[];
+  coachingLevel: string;
+  yearsCoaching: string;
+  coachingPhilosophy: string;
 }
 
 interface FixedOnboardingProps {
@@ -34,22 +35,23 @@ interface FixedOnboardingProps {
 const FixedOnboarding: React.FC<FixedOnboardingProps> = ({ onComplete, onBack }) => {
   const [step, setStep] = useState(1);
   
-  // Individual state for each field to prevent re-renders
+  // Form state
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [role, setRole] = useState<'athlete' | 'coach'>('athlete');
-  const [coachCode, setCoachCode] = useState('');
-  const [age, setAge] = useState('');
-  const [yearsExperience, setYearsExperience] = useState('');
+  const [experienceLevel, setExperienceLevel] = useState('');
+  const [primaryEvents, setPrimaryEvents] = useState<string[]>([]);
+  const [personalRecords, setPersonalRecords] = useState<{ [key: string]: string }>({});
   const [trainingGoals, setTrainingGoals] = useState('');
+  const [coachCode, setCoachCode] = useState('');
+  const [hasCoach, setHasCoach] = useState(false);
+  const [specialtyEvents, setSpecialtyEvents] = useState<string[]>([]);
   const [coachingLevel, setCoachingLevel] = useState('');
   const [yearsCoaching, setYearsCoaching] = useState('');
   const [coachingPhilosophy, setCoachingPhilosophy] = useState('');
-  const [primaryEvents, setPrimaryEvents] = useState<string[]>([]);
-  const [personalRecords, setPersonalRecords] = useState<{ [key: string]: string }>({});
-  const [specialtyEvents, setSpecialtyEvents] = useState<string[]>([]);
-  
+
   // Track & Field Events
   const trackFieldEvents = [
     { name: '100m', category: 'Sprints' },
@@ -67,11 +69,11 @@ const FixedOnboarding: React.FC<FixedOnboardingProps> = ({ onComplete, onBack })
     { name: 'Pole Vault', category: 'Jumps' },
     { name: 'Shot Put', category: 'Throws' },
     { name: 'Discus', category: 'Throws' },
-    { name: 'Javelin', category: 'Throws' },
-    { name: 'Hammer Throw', category: 'Throws' }
+    { name: 'Hammer Throw', category: 'Throws' },
+    { name: 'Javelin', category: 'Throws' }
   ];
 
-  const totalSteps = 4; // 4 steps for both athletes and coaches
+  const totalSteps = 4;
   const progress = (step / totalSteps) * 100;
 
   const nextStep = () => setStep(prev => Math.min(prev + 1, totalSteps));
@@ -82,36 +84,38 @@ const FixedOnboarding: React.FC<FixedOnboardingProps> = ({ onComplete, onBack })
       fullName,
       email,
       password,
+      username,
       role,
-      coachCode: coachCode || undefined,
-      age: age ? parseInt(age) : undefined,
-      yearsExperience: yearsExperience ? parseInt(yearsExperience) : undefined,
-      trainingGoals: trainingGoals || undefined,
-      coachingLevel: coachingLevel || undefined,
-      yearsCoaching: yearsCoaching ? parseInt(yearsCoaching) : undefined,
-      coachingPhilosophy: coachingPhilosophy || undefined,
-      primaryEvents: primaryEvents.length > 0 ? primaryEvents : undefined,
-      specialtyEvents: role === 'coach' ? (specialtyEvents.length > 0 ? specialtyEvents : undefined) : undefined,
-      personalRecords: Object.keys(personalRecords).length > 0 ? personalRecords : undefined,
+      experienceLevel,
+      primaryEvents,
+      personalRecords,
+      trainingGoals,
+      coachCode: hasCoach ? coachCode : undefined,
+      hasCoach,
+      specialtyEvents,
+      coachingLevel,
+      yearsCoaching,
+      coachingPhilosophy
     };
     onComplete(data);
   };
 
-  const renderStep = () => {
+  const renderStepContent = () => {
     switch (step) {
       case 1:
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
+              <User className="h-12 w-12 mx-auto mb-4" style={{ color: athleticTechTheme.colors.primary.track }} />
               <h2 className="text-2xl font-bold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
                 Create Your Account
               </h2>
               <p style={{ color: athleticTechTheme.colors.text.secondary }}>
-                Join TrackPro AI and elevate your performance
+                Let's start with your basic information
               </p>
             </div>
-            
-            <div className="space-y-4">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="fullName">Full Name</Label>
                 <Input
@@ -121,78 +125,37 @@ const FixedOnboarding: React.FC<FixedOnboardingProps> = ({ onComplete, onBack })
                   placeholder="Enter your full name"
                 />
               </div>
-
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your.email@example.com"
+                  id="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Choose a username"
                 />
               </div>
+            </div>
 
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Create a secure password"
-                />
-              </div>
-              
-              {role === 'athlete' && (
-                <div>
-                  <Label htmlFor="coachCode">Coach Code (Optional)</Label>
-                  <Input
-                    id="coachCode"
-                    type="text"
-                    value={coachCode}
-                    onChange={(e) => setCoachCode(e.target.value.toUpperCase())}
-                    placeholder="Enter your coach's code (e.g., COACH123)"
-                    maxLength={10}
-                  />
-                  <p className="text-xs mt-1" style={{ color: athleticTechTheme.colors.text.secondary }}>
-                    If your coach gave you a code, enter it here to connect with them
-                  </p>
-                </div>
-              )}
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+              />
+            </div>
 
-              <div>
-                <Label>I am a...</Label>
-                <div className="grid grid-cols-2 gap-4 mt-2">
-                  <Card 
-                    className={`cursor-pointer transition-all ${role === 'athlete' ? 'ring-2 ring-blue-500' : ''}`}
-                    style={{ backgroundColor: athleticTechTheme.colors.surface.elevated }}
-                    onClick={() => setRole('athlete')}
-                  >
-                    <CardContent className="p-4 text-center">
-                      <User className="h-8 w-8 mx-auto mb-2" style={{ color: athleticTechTheme.colors.primary.track }} />
-                      <h3 className="font-semibold" style={{ color: athleticTechTheme.colors.text.primary }}>Athlete</h3>
-                      <p className="text-sm" style={{ color: athleticTechTheme.colors.text.secondary }}>
-                        Track your training and performance
-                      </p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card 
-                    className={`cursor-pointer transition-all ${role === 'coach' ? 'ring-2 ring-blue-500' : ''}`}
-                    style={{ backgroundColor: athleticTechTheme.colors.surface.elevated }}
-                    onClick={() => setRole('coach')}
-                  >
-                    <CardContent className="p-4 text-center">
-                      <Trophy className="h-8 w-8 mx-auto mb-2" style={{ color: athleticTechTheme.colors.primary.power }} />
-                      <h3 className="font-semibold" style={{ color: athleticTechTheme.colors.text.primary }}>Coach</h3>
-                      <p className="text-sm" style={{ color: athleticTechTheme.colors.text.secondary }}>
-                        Manage athletes and training plans
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Create a password"
+              />
             </div>
           </div>
         );
@@ -201,67 +164,68 @@ const FixedOnboarding: React.FC<FixedOnboardingProps> = ({ onComplete, onBack })
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
+              <Trophy className="h-12 w-12 mx-auto mb-4" style={{ color: athleticTechTheme.colors.primary.power }} />
               <h2 className="text-2xl font-bold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
-                {role === 'athlete' ? 'Athletic Background' : 'Coaching Background'}
+                Choose Your Role
               </h2>
               <p style={{ color: athleticTechTheme.colors.text.secondary }}>
-                Tell us about your {role === 'athlete' ? 'athletic' : 'coaching'} experience
+                Are you an athlete or a coach?
               </p>
             </div>
-            
-            <div className="space-y-4">
-              {role === 'athlete' ? (
-                <>
-                  <div>
-                    <Label htmlFor="age">Age</Label>
-                    <Input
-                      id="age"
-                      type="number"
-                      value={age}
-                      onChange={(e) => setAge(e.target.value)}
-                      placeholder="18"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="experience">Years in Track & Field</Label>
-                    <Input
-                      id="experience"
-                      type="number"
-                      value={yearsExperience}
-                      onChange={(e) => setYearsExperience(e.target.value)}
-                      placeholder="5"
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <Label>Coaching Level</Label>
-                    <Select value={coachingLevel} onValueChange={setCoachingLevel}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your coaching level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="high_school">High School Coach</SelectItem>
-                        <SelectItem value="college">College Coach</SelectItem>
-                        <SelectItem value="club">Club Coach</SelectItem>
-                        <SelectItem value="professional">Professional Coach</SelectItem>
-                        <SelectItem value="personal_trainer">Personal Trainer</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="yearsCoaching">Years Coaching</Label>
-                    <Input
-                      id="yearsCoaching"
-                      type="number"
-                      value={yearsCoaching}
-                      onChange={(e) => setYearsCoaching(e.target.value)}
-                      placeholder="5"
-                    />
-                  </div>
-                </>
-              )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card 
+                className={`cursor-pointer transition-all ${role === 'athlete' ? 'ring-2' : ''}`}
+                style={{ 
+                  backgroundColor: athleticTechTheme.colors.surface.elevated,
+                  borderColor: role === 'athlete' ? athleticTechTheme.colors.primary.track : 'transparent'
+                }}
+                onClick={() => setRole('athlete')}
+              >
+                <CardContent className="p-6 text-center">
+                  <User className="h-8 w-8 mx-auto mb-3" style={{ color: athleticTechTheme.colors.primary.track }} />
+                  <h3 className="font-semibold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                    Athlete
+                  </h3>
+                  <p className="text-sm" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                    Track your training, performance, and work with coaches
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className={`cursor-pointer transition-all ${role === 'coach' ? 'ring-2' : ''}`}
+                style={{ 
+                  backgroundColor: athleticTechTheme.colors.surface.elevated,
+                  borderColor: role === 'coach' ? athleticTechTheme.colors.primary.power : 'transparent'
+                }}
+                onClick={() => setRole('coach')}
+              >
+                <CardContent className="p-6 text-center">
+                  <Trophy className="h-8 w-8 mx-auto mb-3" style={{ color: athleticTechTheme.colors.primary.power }} />
+                  <h3 className="font-semibold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                    Coach
+                  </h3>
+                  <p className="text-sm" style={{ color: athleticTechTheme.colors.text.secondary }}>
+                    Manage athletes, create training plans, and analyze performance
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div>
+              <Label htmlFor="experienceLevel">Experience Level</Label>
+              <Select value={experienceLevel} onValueChange={setExperienceLevel}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your experience level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
+                  <SelectItem value="elite">Elite</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         );
@@ -271,148 +235,60 @@ const FixedOnboarding: React.FC<FixedOnboardingProps> = ({ onComplete, onBack })
           return (
             <div className="space-y-6">
               <div className="text-center mb-6">
+                <Target className="h-12 w-12 mx-auto mb-4" style={{ color: athleticTechTheme.colors.primary.field }} />
                 <h2 className="text-2xl font-bold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
-                  Your Events
+                  Your Events & Coach
                 </h2>
                 <p style={{ color: athleticTechTheme.colors.text.secondary }}>
-                  Select up to 3 events you compete in or want to focus on
+                  Select your primary events and connect with a coach
                 </p>
               </div>
-              
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
-                  {trackFieldEvents.map((event) => {
-                    const isSelected = primaryEvents.includes(event.name);
-                    const maxReached = primaryEvents.length >= 3;
-                    
-                    return (
-                      <Button
-                        key={event.name}
-                        variant={isSelected ? "default" : "outline"}
-                        size="sm"
-                        className="justify-start text-left h-auto py-2"
-                        disabled={maxReached && !isSelected}
-                        onClick={() => {
-                          if (isSelected) {
-                            setPrimaryEvents(prev => prev.filter(e => e !== event.name));
-                          } else if (!maxReached) {
-                            setPrimaryEvents(prev => [...prev, event.name]);
-                          }
-                        }}
-                        style={{
-                          backgroundColor: isSelected ? athleticTechTheme.colors.primary.track : 'transparent'
-                        }}
-                      >
-                        <div>
-                          <div className="font-medium">{event.name}</div>
-                          <div className="text-xs opacity-70">{event.category}</div>
-                        </div>
-                      </Button>
-                    );
-                  })}
-                </div>
-                <p className="text-sm text-center" style={{ color: athleticTechTheme.colors.text.secondary }}>
-                  Selected: {primaryEvents.length}/3
-                </p>
-              </div>
-            </div>
-          );
-        } else {
-          return (
-            <div className="space-y-6">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
-                  Your Specialty Events
-                </h2>
-                <p style={{ color: athleticTechTheme.colors.text.secondary }}>
-                  Select the events you coach or specialize in
-                </p>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
-                  {trackFieldEvents.map((event) => {
-                    const isSelected = specialtyEvents.includes(event.name);
-                    
-                    return (
-                      <Button
-                        key={event.name}
-                        variant={isSelected ? "default" : "outline"}
-                        size="sm"
-                        className="justify-start text-left h-auto py-2"
-                        onClick={() => {
-                          if (isSelected) {
-                            setSpecialtyEvents(prev => prev.filter(e => e !== event.name));
-                          } else {
-                            setSpecialtyEvents(prev => [...prev, event.name]);
-                          }
-                        }}
-                        style={{
-                          backgroundColor: isSelected ? athleticTechTheme.colors.primary.power : 'transparent'
-                        }}
-                      >
-                        <div>
-                          <div className="font-medium">{event.name}</div>
-                          <div className="text-xs opacity-70">{event.category}</div>
-                        </div>
-                      </Button>
-                    );
-                  })}
-                </div>
-                <p className="text-sm text-center" style={{ color: athleticTechTheme.colors.text.secondary }}>
-                  Selected: {specialtyEvents.length} events
-                </p>
-              </div>
-            </div>
-          );
-        }
-        
-      case 4:
-        if (role === 'athlete') {
-          return (
-            <div className="space-y-6">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
-                  Personal Records & Goals
-                </h2>
-                <p style={{ color: athleticTechTheme.colors.text.secondary }}>
-                  Enter your current personal bests and training goals
-                </p>
-              </div>
-            
-            <div className="space-y-4">
-              {primaryEvents.length > 0 && (
-                <div>
-                  <Label>Personal Records</Label>
-                  <div className="space-y-3 mt-2">
-                    {primaryEvents.map((event) => (
-                      <div key={event} className="flex items-center space-x-2">
-                        <Label className="text-sm w-24">{event}:</Label>
-                        <Input
-                          placeholder="e.g., 12.50s or 6.20m"
-                          value={personalRecords[event] || ''}
-                          onChange={(e) => {
-                            setPersonalRecords(prev => ({
-                              ...prev,
-                              [event]: e.target.value
-                            }));
-                          }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
+
               <div>
-                <Label htmlFor="goals">Training Goals</Label>
-                <Textarea
-                  id="goals"
-                  placeholder="What are your main training goals? (e.g., qualify for nationals, improve 100m time, etc.)"
-                  value={trainingGoals}
-                  onChange={(e) => setTrainingGoals(e.target.value)}
-                  rows={3}
-                />
+                <Label>Primary Events (select up to 3)</Label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                  {trackFieldEvents.map((event) => (
+                    <Button
+                      key={event.name}
+                      variant={primaryEvents.includes(event.name) ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        if (primaryEvents.includes(event.name)) {
+                          setPrimaryEvents(prev => prev.filter(e => e !== event.name));
+                        } else if (primaryEvents.length < 3) {
+                          setPrimaryEvents(prev => [...prev, event.name]);
+                        }
+                      }}
+                      className="text-xs"
+                    >
+                      {event.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="hasCoach"
+                    checked={hasCoach}
+                    onChange={(e) => setHasCoach(e.target.checked)}
+                  />
+                  <Label htmlFor="hasCoach">I have a coach</Label>
+                </div>
+
+                {hasCoach && (
+                  <div>
+                    <Label htmlFor="coachCode">Coach Code</Label>
+                    <Input
+                      id="coachCode"
+                      value={coachCode}
+                      onChange={(e) => setCoachCode(e.target.value)}
+                      placeholder="Enter your coach's code"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -420,29 +296,103 @@ const FixedOnboarding: React.FC<FixedOnboardingProps> = ({ onComplete, onBack })
           return (
             <div className="space-y-6">
               <div className="text-center mb-6">
+                <Trophy className="h-12 w-12 mx-auto mb-4" style={{ color: athleticTechTheme.colors.primary.power }} />
                 <h2 className="text-2xl font-bold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
-                  Coaching Philosophy
+                  Coaching Specialties
                 </h2>
                 <p style={{ color: athleticTechTheme.colors.text.secondary }}>
-                  Describe your coaching approach and philosophy
+                  Tell us about your coaching background
                 </p>
               </div>
-              
-              <div className="space-y-4">
+
+              <div>
+                <Label>Specialty Events</Label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                  {trackFieldEvents.map((event) => (
+                    <Button
+                      key={event.name}
+                      variant={specialtyEvents.includes(event.name) ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        if (specialtyEvents.includes(event.name)) {
+                          setSpecialtyEvents(prev => prev.filter(e => e !== event.name));
+                        } else {
+                          setSpecialtyEvents(prev => [...prev, event.name]);
+                        }
+                      }}
+                      className="text-xs"
+                    >
+                      {event.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="philosophy">Coaching Philosophy</Label>
-                  <Textarea
-                    id="philosophy"
-                    placeholder="Describe your coaching philosophy, training methods, and approach to developing athletes..."
-                    value={coachingPhilosophy}
-                    onChange={(e) => setCoachingPhilosophy(e.target.value)}
-                    rows={4}
+                  <Label htmlFor="coachingLevel">Coaching Level</Label>
+                  <Select value={coachingLevel} onValueChange={setCoachingLevel}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="youth">Youth</SelectItem>
+                      <SelectItem value="high-school">High School</SelectItem>
+                      <SelectItem value="college">College</SelectItem>
+                      <SelectItem value="professional">Professional</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="yearsCoaching">Years Coaching</Label>
+                  <Input
+                    id="yearsCoaching"
+                    value={yearsCoaching}
+                    onChange={(e) => setYearsCoaching(e.target.value)}
+                    placeholder="e.g., 5"
                   />
                 </div>
               </div>
             </div>
           );
         }
+
+      case 4:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <CheckCircle className="h-12 w-12 mx-auto mb-4" style={{ color: athleticTechTheme.colors.performance.excellent }} />
+              <h2 className="text-2xl font-bold mb-2" style={{ color: athleticTechTheme.colors.text.primary }}>
+                {role === 'athlete' ? 'Training Goals' : 'Coaching Philosophy'}
+              </h2>
+              <p style={{ color: athleticTechTheme.colors.text.secondary }}>
+                {role === 'athlete' 
+                  ? 'What are your training and performance goals?'
+                  : 'Share your coaching philosophy and approach'
+                }
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="goals">
+                {role === 'athlete' ? 'Training Goals' : 'Coaching Philosophy'}
+              </Label>
+              <Textarea
+                id="goals"
+                value={role === 'athlete' ? trainingGoals : coachingPhilosophy}
+                onChange={(e) => role === 'athlete' 
+                  ? setTrainingGoals(e.target.value)
+                  : setCoachingPhilosophy(e.target.value)
+                }
+                placeholder={role === 'athlete' 
+                  ? 'Describe your training goals, target times, competitions you want to compete in...'
+                  : 'Describe your coaching philosophy, training methods, athlete development approach...'
+                }
+                rows={6}
+              />
+            </div>
+          </div>
+        );
 
       default:
         return null;
@@ -466,24 +416,32 @@ const FixedOnboarding: React.FC<FixedOnboardingProps> = ({ onComplete, onBack })
         </CardHeader>
 
         <CardContent>
-          {renderStep()}
+          {renderStepContent()}
 
           <div className="flex justify-end mt-8">
             {step === totalSteps ? (
               <Button 
                 onClick={handleComplete}
                 style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
-                disabled={!fullName || !email || !password}
+                disabled={
+                  (step === 1 && (!fullName || !email || !password || !username)) ||
+                  (step === 2 && (!role || !experienceLevel)) ||
+                  (step === 3 && role === 'athlete' && primaryEvents.length === 0) ||
+                  (step === 3 && role === 'coach' && specialtyEvents.length === 0) ||
+                  (step === 4 && role === 'athlete' && !trainingGoals) ||
+                  (step === 4 && role === 'coach' && !coachingPhilosophy)
+                }
               >
                 Complete Setup
-                <Trophy className="h-4 w-4 ml-2" />
+                <CheckCircle className="h-4 w-4 ml-2" />
               </Button>
             ) : (
               <Button 
                 onClick={nextStep}
                 style={{ backgroundColor: athleticTechTheme.colors.primary.track }}
                 disabled={
-                  (step === 1 && (!fullName || !email || !password)) ||
+                  (step === 1 && (!fullName || !email || !password || !username)) ||
+                  (step === 2 && (!role || !experienceLevel)) ||
                   (step === 3 && role === 'athlete' && primaryEvents.length === 0) ||
                   (step === 3 && role === 'coach' && specialtyEvents.length === 0)
                 }
