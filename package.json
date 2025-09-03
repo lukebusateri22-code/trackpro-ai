@@ -8,7 +8,11 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "setup": "node scripts/production-setup.js",
+    "test:db": "node scripts/test-database.js",
+    "deploy": "npm run build && npx netlify deploy --prod --dir=dist",
+    "deploy:preview": "npm run build && npx netlify deploy --dir=dist"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",
@@ -85,6 +89,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "autoprefixer": "^10.4.20",
+    "dotenv": "^17.2.2",
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
