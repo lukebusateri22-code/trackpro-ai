@@ -1,5 +1,5 @@
-// Database Types for TrackPro AI
-// Generated from Supabase schema
+// Database Types for TrackPro AI - Complete Schema
+// Generated from comprehensive Supabase schema
 
 export interface Database {
   public: {
@@ -20,6 +20,7 @@ export interface Database {
           location: string | null;
           phone: string | null;
           emergency_contact: any | null;
+          coach_code: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -38,6 +39,7 @@ export interface Database {
           location?: string | null;
           phone?: string | null;
           emergency_contact?: any | null;
+          coach_code?: string | null;
           created_at?: string;
           updated_at?: string;
         };

@@ -1,312 +1,135 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session, AuthError } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
-import { profileService } from '@/services/api';
-import type { Profile } from '@/types/database';
+import { authService, type AuthUser } from '@/services/auth';
+import type { Database } from '@/types/database';
+
+type Profile = Database['public']['Tables']['profiles']['Row'];
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   profile: Profile | null;
-  session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, userData?: Partial<Profile>) => Promise<{ error: AuthError | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signOut: () => Promise<{ error: AuthError | null }>;
-  updateProfile: (updates: Partial<Profile>) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signUp: (data: {
+    email: string;
+    password: string;
+    username: string;
+    fullName: string;
+    role: 'athlete' | 'coach';
+    coachCode?: string;
+    primaryEvents?: string[];
+    experienceLevel?: 'beginner' | 'intermediate' | 'advanced' | 'elite';
+  }) => Promise<{ error: string | null }>;
+  signOut: () => Promise<{ error: string | null }>;
+  updateProfile: (updates: Partial<Profile>) => Promise<boolean>;
+  connectToCoach: (coachCode: string) => Promise<{ success: boolean; error: string | null }>;
+  disconnectFromCoach: (coachId: string) => Promise<{ success: boolean; error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Get initial user
+    authService.getCurrentUser().then((currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+
+    // Listen for auth state changes
+    const { data: { subscription } } = authService.onAuthStateChange((authUser) => {
+      setUser(authUser);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signIn = async (email: string, password: string) => {
+    setLoading(true);
+    const { user: authUser, error } = await authService.signIn({ email, password });
+    if (authUser) {
+      setUser(authUser);
+    }
+    setLoading(false);
+    return { error };
+  };
+
+  const signUp = async (data: {
+    email: string;
+    password: string;
+    username: string;
+    fullName: string;
+    role: 'athlete' | 'coach';
+    coachCode?: string;
+    primaryEvents?: string[];
+    experienceLevel?: 'beginner' | 'intermediate' | 'advanced' | 'elite';
+  }) => {
+    setLoading(true);
+    const { user: authUser, error } = await authService.signUp(data);
+    if (authUser) {
+      setUser(authUser);
+    }
+    setLoading(false);
+    return { error };
+  };
+
+  const signOut = async () => {
+    setLoading(true);
+    const { error } = await authService.signOut();
+    setUser(null);
+    setLoading(false);
+    return { error };
+  };
+
+  const updateProfile = async (updates: Partial<Profile>): Promise<boolean> => {
+    if (!user) return false;
+    
+    // Import profileService here to avoid circular dependency
+    const { profileService } = await import('@/services/database');
+    const updatedProfile = await profileService.upsertProfile({
+      id: user.id,
+      ...updates
+    });
+    
+    if (updatedProfile) {
+      setUser({ ...user, profile: updatedProfile });
+      return true;
+    }
+    return false;
+  };
+
+  const connectToCoach = async (coachCode: string) => {
+    if (!user) return { success: false, error: 'Not authenticated' };
+    return authService.connectToCoach(user.id, coachCode);
+  };
+
+  const disconnectFromCoach = async (coachId: string) => {
+    if (!user) return { success: false, error: 'Not authenticated' };
+    return authService.disconnectFromCoach(user.id, coachId);
+  };
+
+  const value = {
+    user,
+    profile: user?.profile || null,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+    updateProfile,
+    connectToCoach,
+    disconnectFromCoach,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
-
-interface AuthProviderProps {
-  children: React.ReactNode;
 }
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  
-  // Check if we're in demo mode
-  const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true';
-
-  // Load user profile
-  const loadProfile = async (userId: string) => {
-    try {
-      const { data, error } = await profileService.getProfile(userId);
-      if (error) {
-        console.warn('Profile load error:', error);
-        return null;
-      }
-      return data;
-    } catch (err) {
-      console.warn('Profile load failed:', err);
-      return null;
-    }
-  };
-
-  // Initialize auth state
-  useEffect(() => {
-    let mounted = true;
-
-    const initializeAuth = async () => {
-      if (isDemoMode) {
-        // Demo mode: just set loading to false
-        console.log('Demo mode: Skipping Supabase initialization');
-        setTimeout(() => {
-          if (mounted) {
-            setLoading(false);
-          }
-        }, 1000);
-        return;
-      }
-      
-      try {
-        // Get initial session
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.warn('Session initialization error:', error);
-        }
-
-        if (mounted && initialSession?.user) {
-          setSession(initialSession);
-          setUser(initialSession.user);
-          
-          // Load profile
-          const userProfile = await loadProfile(initialSession.user.id);
-          if (mounted) {
-            setProfile(userProfile);
-          }
-        }
-      } catch (err) {
-        console.warn('Auth initialization failed:', err);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    initializeAuth();
-
-    if (!isDemoMode) {
-      // Listen for auth changes only in non-demo mode
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        async (event, session) => {
-          console.log('Auth state change:', event, session?.user?.email);
-          
-          if (mounted) {
-            setSession(session);
-            setUser(session?.user ?? null);
-
-            if (session?.user) {
-              // Load profile for authenticated user
-              const userProfile = await loadProfile(session.user.id);
-              if (mounted) {
-                setProfile(userProfile);
-              }
-            } else {
-              // Clear profile for unauthenticated user
-              setProfile(null);
-            }
-
-            setLoading(false);
-          }
-        }
-      );
-
-      return () => {
-        mounted = false;
-        subscription.unsubscribe();
-      };
-    }
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // Sign up function
-  const signUp = async (email: string, password: string, userData?: Partial<Profile>) => {
-    if (isDemoMode) {
-      // Demo mode: simulate successful signup
-      console.log('Demo mode: Simulating signup for', email);
-      const mockUser = {
-        id: 'demo-user-' + Date.now(),
-        email,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      } as User;
-      
-      const mockProfile = {
-        id: mockUser.id,
-        username: userData?.username || email.split('@')[0],
-        full_name: userData?.full_name || 'Demo User',
-        role: userData?.role || 'athlete',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      } as Profile;
-      
-      setTimeout(() => {
-        setUser(mockUser);
-        setProfile(mockProfile);
-        setSession({ user: mockUser } as Session);
-      }, 1000);
-      
-      return { error: null };
-    }
-    
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: userData || {}
-        }
-      });
-
-      if (error) {
-        console.error('Sign up error:', error);
-        return { error };
-      }
-
-      // If user is immediately confirmed, create profile
-      if (data.user && !data.user.email_confirmed_at) {
-        console.log('Please check your email to confirm your account');
-      }
-
-      return { error: null };
-    } catch (err) {
-      console.error('Sign up failed:', err);
-      return { error: err as AuthError };
-    }
-  };
-
-  // Sign in function
-  const signIn = async (email: string, password: string) => {
-    if (isDemoMode) {
-      // Demo mode: simulate successful signin
-      console.log('Demo mode: Simulating signin for', email);
-      const mockUser = {
-        id: 'demo-user-signin',
-        email,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      } as User;
-      
-      const mockProfile = {
-        id: mockUser.id,
-        username: email.split('@')[0],
-        full_name: 'Demo User',
-        role: 'athlete',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      } as Profile;
-      
-      setTimeout(() => {
-        setUser(mockUser);
-        setProfile(mockProfile);
-        setSession({ user: mockUser } as Session);
-      }, 500);
-      
-      return { error: null };
-    }
-    
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        console.error('Sign in error:', error);
-        return { error };
-      }
-
-      return { error: null };
-    } catch (err) {
-      console.error('Sign in failed:', err);
-      return { error: err as AuthError };
-    }
-  };
-
-  // Sign out function
-  const signOut = async () => {
-    if (isDemoMode) {
-      // Demo mode: just clear local state
-      console.log('Demo mode: Simulating signout');
-      setUser(null);
-      setProfile(null);
-      setSession(null);
-      return { error: null };
-    }
-    
-    try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error('Sign out error:', error);
-        return { error };
-      }
-
-      // Clear local state
-      setUser(null);
-      setProfile(null);
-      setSession(null);
-
-      return { error: null };
-    } catch (err) {
-      console.error('Sign out failed:', err);
-      return { error: err as AuthError };
-    }
-  };
-
-  // Update profile function
-  const updateProfile = async (updates: Partial<Profile>) => {
-    if (!user) {
-      return { error: new Error('No authenticated user') };
-    }
-
-    try {
-      const { data, error } = await profileService.updateProfile(user.id, updates);
-      
-      if (error) {
-        console.error('Profile update error:', error);
-        return { error };
-      }
-
-      // Update local state
-      setProfile(data);
-      return { error: null };
-    } catch (err) {
-      console.error('Profile update failed:', err);
-      return { error: err };
-    }
-  };
-
-  const value: AuthContextType = {
-    user,
-    profile,
-    session,
-    loading,
-    signUp,
-    signIn,
-    signOut,
-    updateProfile
-  };
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
